@@ -1,7 +1,7 @@
-import { createElement } from '../render';
+import GetRemoveElement from './getOrRemoveElements-view';
 
-const createAddEventTemplate = () => (
-  `<li class="trip-events__item">
+const createAddPointTemplate = () => (
+  `            <li class="trip-events__item">
   <form class="event event--edit" action="#" method="post">
     <header class="event__header">
       <div class="event__type-wrapper">
@@ -165,20 +165,8 @@ const createAddEventTemplate = () => (
 </li>`
 );
 
-export default class AddEventView {
+export default class AddPointView extends GetRemoveElement {
   getTemplate() {
-    return createAddEventTemplate();
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+    return createAddPointTemplate();
   }
 }

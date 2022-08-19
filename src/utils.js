@@ -10,27 +10,12 @@ const humanizePointDate = (date) => dayjs(date).format('MMM D');
 const humanizePointTime = (time) => dayjs(time).format('HH:MM');
 
 
-const randomInteger = (min, max) => {
+const getRandomInteger = (min, max) => {
   const randElement = min + Math.random() * (max + 1 - min);
   return Math.floor(randElement);
 };
 
-const getArray = (elements) => {
-  const maxLength = elements.length;
-  const lengthOfArray = randomInteger(1, maxLength);
-  const array = [];
+const getArray = (elements) => [...new Set(elements)].slice(0, getRandomInteger(0, 8));
 
-  while (array.length < lengthOfArray) {
-    const indexOfEl = randomInteger(0, maxLength - 1);
-    const el = elements[indexOfEl];
-
-    if (!array.includes(el)) {
-      array.push(el);
-    }
-  }
-  return array;
-};
-
-
-export {getRandomElement, humanizePointDate, humanizePointTime, randomInteger, getArray};
+export {getRandomElement, humanizePointDate, humanizePointTime, getRandomInteger, getArray};
 

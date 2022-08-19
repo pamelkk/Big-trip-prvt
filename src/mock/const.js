@@ -1,6 +1,6 @@
 const TYPE_OF_TRANSPORT = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
 
-const CITIES = ['Chamonix', 'Amsterdam', 'Geneva', 'Pattaya'];
+const CITIES = ['Chamonix', 'Amsterdam', 'Geneva'];
 
 const DESCRIPTION = ['Chamonix, is a beautiful city, a true asian pearl, with crowded streets.', 'Cras aliquet varius magna, non porta ligula feugiat eget.', 'Fusce tristique felis at fermentum pharetra.', 'Aliquam id orci ut lectus varius viverra.'];
 

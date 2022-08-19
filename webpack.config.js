@@ -1,5 +1,5 @@
 const path = require('path');
-const CopyPlagin = require('copy-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: './src/main.js',
@@ -10,7 +10,7 @@ module.exports = {
   },
   devtool: 'source-map',
   plugins: [
-    new CopyPlagin({
+    new CopyPlugin({
       patterns: [{from: 'public'}]
     })
   ],

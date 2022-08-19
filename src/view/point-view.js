@@ -1,14 +1,20 @@
-import { createElement } from '../render';
 import { humanizePointDate, humanizePointTime } from '../utils';
+import GetRemoveElement from './getOrRemoveElements-view';
 
-const createEventTemplate = (point, destination, offers) => {
+const createEventTemplate = (point, destination, selectedOffers) => {
   const { type, dateFrom, dateTo, basePrice } = point;
   const {name} = destination;
-  const {title} = offers;
 
-  const dateStart = dateFrom !== null ? humanizePointDate(dateFrom) : '';
-  const timeFrom = dateFrom !== null ? humanizePointTime(dateFrom) : '';
-  const timeTo = dateTo !== null ? humanizePointTime(dateTo) : '';
+  const offers = selectedOffers[0].offers.map((offersItem) => `
+  <li class='event__offer'>
+    <span class='event__offer-title'>${offersItem.title}</span>
+    &plus;&euro;&nbsp;
+    <span class='event__offer-price'>${offersItem.price}</span>
+  </li>`);
+
+  const dateStart = dateFrom ? humanizePointDate(dateFrom) : '';
+  const timeFrom = dateFrom ? humanizePointTime(dateFrom) : '';
+  const timeTo = dateTo ? humanizePointTime(dateTo) : '';
 
   return `<li class='trip-events__item'>
     <div class='event'>
@@ -29,11 +35,7 @@ const createEventTemplate = (point, destination, offers) => {
       </p>
       <h4 class='visually-hidden'>Offers:</h4>
       <ul class='event__selected-offers'>
-        <li class='event__offer'>
-          <span class='event__offer-title'>${title}</span>
-          &plus;&euro;&nbsp;
-          <span class='event__offer-price'>20</span>
-        </li>
+        ${offers}
       </ul>
       <button class='event__rollup-btn' type='button'>
         <span class='visually-hidden'>Open event</span>
@@ -42,26 +44,15 @@ const createEventTemplate = (point, destination, offers) => {
   </li>`;
 };
 
-export default class PointView {
-  constructor(point, destination, offers) {
+export default class PointView extends GetRemoveElement {
+  constructor(point, destination, selectedOffers) {
+    super();
     this.point = point;
     this.destination = destination;
-    this.offers = offers;
+    this.selectedOffers = selectedOffers;
   }
 
   getTemplate() {
-    return createEventTemplate(this.point, this.destination, this.offers);
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+    return createEventTemplate(this.point, this.destination, this.selectedOffers);
   }
 }
