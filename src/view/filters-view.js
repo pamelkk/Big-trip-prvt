@@ -1,4 +1,4 @@
-import { createElement } from '../render';
+import GetRemoveElement from './getOrRemoveElements-view';
 
 const createFiltersTemplate = () => (
   `<form class="trip-filters" action="#" method="get">
@@ -16,20 +16,8 @@ const createFiltersTemplate = () => (
 </form>`
 );
 
-export default class FiltersView {
+export default class FiltersView extends GetRemoveElement {
   getTemplate() {
     return createFiltersTemplate();
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
   }
 }

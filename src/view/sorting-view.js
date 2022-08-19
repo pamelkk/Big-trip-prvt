@@ -1,4 +1,4 @@
-import { createElement } from '../render';
+import GetRemoveElement from './getOrRemoveElements-view';
 
 const createSortingTemplate = () => (
   `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
@@ -29,20 +29,8 @@ const createSortingTemplate = () => (
 </form>`
 );
 
-export default class SortingView {
+export default class SortingView extends GetRemoveElement {
   getTemplate() {
     return createSortingTemplate();
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
   }
 }

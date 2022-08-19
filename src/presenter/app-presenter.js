@@ -1,24 +1,39 @@
 import { render } from '../render';
-import EventView from '../view/event-view';
-import ListEventsView from '../view/events-list-view';
-import EditEventView from '../view/edit-event-view';
-import AddEventView from '../view/add-event-view';
-const countEvent = 3;
+import ListPointsView from '../view/points-list-view';
+import PointView from '../view/point-view';
+import EditPointView from '../view/edit-point-view';
+import AddPointView from '../view/add-point-view';
+import { getRandomElement } from '../utils';
 
 export default class AppPresenter {
-  eventListComponent = new ListEventsView();
-  editEventComponent = new EditEventView();
-  addEventComponent = new AddEventView();
+  eventListComponent = new ListPointsView();
+  editEventComponent = new EditPointView();
+  addEventComponent = new AddPointView();
 
-  init = (appContainer) => {
+  init = (appContainer, pointModel) => {
     this.appContainer = appContainer;
+    this.pointModel = pointModel;
+    this.points = [...pointModel.getPoints()];
+    this.offers = [...pointModel.getOffers()];
+    this.destinations = [...pointModel.getDestinations()];
+    const destinationForEdit = getRandomElement(this.destinations);
+    const pointForEdit = getRandomElement(this.points);
+    const offersForEdit = getRandomElement(this.offers);
 
     render(this.eventListComponent, this.appContainer);
-    render(this.editEventComponent, this.eventListComponent.getElement());
+    render(new EditPointView(destinationForEdit, pointForEdit, offersForEdit), this.eventListComponent.getElement());
     render(this.addEventComponent, this.eventListComponent.getElement());
 
-    for(let i = 0; i < countEvent; i++) {
-      render(new EventView(), this.eventListComponent.getElement());
+    for(let i = 0; i < this.points.length; i++) {
+      for (let j = 0; j < this.offers.length; j++) {
+        const destination = this.destinations.find((item) => item.id === this.points[i].destination);
+
+        const selectedOffers = this.offers.filter((item) => item.type === this.points[i].type);
+
+        this.points[i].offers = selectedOffers;
+
+        render(new PointView(this.points[i], destination, selectedOffers), this.eventListComponent.getElement());
+      }
     }
   };
 }
