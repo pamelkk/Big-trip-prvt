@@ -1,10 +1,10 @@
 import GetRemoveElement from './getOrRemoveElements-view';
 
 const CreateEditPointTemplate = (destination, point, offers) => {
-  const {name, description} = destination;
+  const {name, description} = destination[0];
   const {type} = point;
 
-  const offersList = offers.offers.map((offersItem) => (
+  const offersListChecked = offers[0].offers.slice(0, 2).map((offersItem) => (
     `<div class="event__offer-selector">
     <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-1" type="checkbox" name="event-offer-luggage" checked>
     <label class="event__offer-label" for="event-offer-luggage-1">
@@ -116,7 +116,7 @@ const CreateEditPointTemplate = (destination, point, offers) => {
         <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
         <div class="event__available-offers">
-        ${offersList}
+        ${offersListChecked}
         </div>
       </section>
 

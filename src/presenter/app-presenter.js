@@ -16,12 +16,12 @@ export default class AppPresenter {
     this.points = [...pointModel.getPoints()];
     this.offers = [...pointModel.getOffers()];
     this.destinations = [...pointModel.getDestinations()];
-    const destinationForEdit = getRandomElement(this.destinations);
     const pointForEdit = getRandomElement(this.points);
-    const offersForEdit = getRandomElement(this.offers);
+    const selectedOffersForEdit = this.offers.filter((item) => item.type === pointForEdit.type);
+    const selectedDestinationForEdit = this.destinations.filter((item) => item.id === pointForEdit.destination);
 
     render(this.eventListComponent, this.appContainer);
-    render(new EditPointView(destinationForEdit, pointForEdit, offersForEdit), this.eventListComponent.getElement());
+    render(new EditPointView(selectedDestinationForEdit, pointForEdit, selectedOffersForEdit), this.eventListComponent.getElement());
     render(this.addEventComponent, this.eventListComponent.getElement());
 
     for(let i = 0; i < this.points.length; i++) {
