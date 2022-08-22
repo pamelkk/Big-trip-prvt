@@ -4,7 +4,7 @@ import { generatePoint } from '../mock/point';
 import { TYPE_OF_TRANSPORT } from '../mock/const';
 
 export default class PointModel {
-  #points = Array.from({length: 3}, generatePoint);
+  #points = Array.from({length: 0}, generatePoint);
   #offersList = offersByType;
   #destinations = destinations;
   #allTypes = TYPE_OF_TRANSPORT;

@@ -3,10 +3,12 @@ import ListPointsView from '../view/points-list-view';
 import PointView from '../view/point-view';
 import EditPointView from '../view/edit-point-view';
 import AddPointView from '../view/add-point-view';
+import OfferToAddPointView from '../view/offerToAddPoint-view';
 
 export default class AppPresenter {
   #eventListComponent = new ListPointsView();
   #addEventComponent = new AddPointView();
+  #offerToAddPointComponent = new OfferToAddPointView();
   #appContainer = null;
   #pointModel = null;
   #points = [];
@@ -64,14 +66,16 @@ export default class AppPresenter {
     render(this.#eventListComponent, this.#appContainer);
     render(this.#addEventComponent, this.#eventListComponent.element);
 
-    for(let i = 0; i < this.#points.length; i++) {
-      const destination = this.#destinations.find((item) => item.id === this.#points[i].destination);
+    if(this.#points.length === 0) {
+      render(this.#offerToAddPointComponent, this.#eventListComponent.element);
+    } else {
+      for(let i = 0; i < this.#points.length; i++) {
+        const destination = this.#destinations.find((item) => item.id === this.#points[i].destination);
+        const selectedOffers = this.#offers.find((item) => item.type === this.#points[i].type);
+        this.#points[i].offers = selectedOffers;
 
-      const selectedOffers = this.#offers.find((item) => item.type === this.#points[i].type);
-
-      this.#points[i].offers = selectedOffers;
-
-      this.#renderPoint(this.#points[i], destination, selectedOffers, this.#allTypes);
+        this.#renderPoint(this.#points[i], destination, selectedOffers, this.#allTypes);
+      }
     }
   };
 }
