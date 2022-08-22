@@ -5,12 +5,13 @@ const createEventTemplate = (point, destination, selectedOffers) => {
   const { type, dateFrom, dateTo, basePrice } = point;
   const {name} = destination;
 
-  const offers = selectedOffers[0].offers.map((offersItem) => `
+  const offers = selectedOffers.offers.reduce((prev, current) => `
+  ${prev}
   <li class='event__offer'>
-    <span class='event__offer-title'>${offersItem.title}</span>
+    <span class='event__offer-title'>${current.title}</span>
     &plus;&euro;&nbsp;
-    <span class='event__offer-price'>${offersItem.price}</span>
-  </li>`);
+    <span class='event__offer-price'>${current.price}</span>
+  </li>`, '');
 
   const dateStart = dateFrom ? humanizePointDate(dateFrom) : '';
   const timeFrom = dateFrom ? humanizePointTime(dateFrom) : '';

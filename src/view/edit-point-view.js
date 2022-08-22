@@ -1,19 +1,26 @@
 import GetRemoveElement from './getOrRemoveElements-view';
 
-const CreateEditPointTemplate = (destination, point, offers) => {
-  const {name, description} = destination[0];
-  const {type} = point;
+const CreateEditPointTemplate = (point, destination, offers, allTypes) => {
+  const {type, basePrice} = point;
+  const {name, description} = destination;
 
-  const offersListChecked = offers[0].offers.slice(0, 2).map((offersItem) => (
-    `<div class="event__offer-selector">
+  const offersList = offers.offers.reduce((prev, current) => `
+  ${prev}
+  <div class="event__offer-selector">
     <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-1" type="checkbox" name="event-offer-luggage" checked>
     <label class="event__offer-label" for="event-offer-luggage-1">
-      <span class="event__offer-title">${offersItem.title}</span>
+      <span class="event__offer-title">${current.title}</span>
       &plus;&euro;&nbsp;
-      <span class="event__offer-price">${offersItem.price}</span>
+      <span class="event__offer-price">${current.price}</span>
     </label>
-  </div>`
-  ));
+  </div>`, '');
+
+  const eventsList = allTypes.reduce((prev, typeOfTransport) => `
+  ${prev}
+  <div class="event__type-item">
+  <input id="event-type-${typeOfTransport}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${typeOfTransport}">
+  <label class="event__type-label  event__type-label--${typeOfTransport}" for="event-type-${typeOfTransport}-1">${typeOfTransport}</label>
+</div>`, '');
 
   return `<li class="trip-events__item">
   <form class="event event--edit" action="#" method="post">
@@ -28,51 +35,7 @@ const CreateEditPointTemplate = (destination, point, offers) => {
         <div class="event__type-list">
           <fieldset class="event__type-group">
             <legend class="visually-hidden">Event type</legend>
-
-            <div class="event__type-item">
-              <input id="event-type-taxi-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="taxi">
-              <label class="event__type-label  event__type-label--taxi" for="event-type-taxi-1">Taxi</label>
-            </div>
-
-            <div class="event__type-item">
-              <input id="event-type-bus-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="bus">
-              <label class="event__type-label  event__type-label--bus" for="event-type-bus-1">Bus</label>
-            </div>
-
-            <div class="event__type-item">
-              <input id="event-type-train-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="train">
-              <label class="event__type-label  event__type-label--train" for="event-type-train-1">Train</label>
-            </div>
-
-            <div class="event__type-item">
-              <input id="event-type-ship-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="ship">
-              <label class="event__type-label  event__type-label--ship" for="event-type-ship-1">Ship</label>
-            </div>
-
-            <div class="event__type-item">
-              <input id="event-type-drive-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="drive">
-              <label class="event__type-label  event__type-label--drive" for="event-type-drive-1">Drive</label>
-            </div>
-
-            <div class="event__type-item">
-              <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" checked>
-              <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1">${type}</label>
-            </div>
-
-            <div class="event__type-item">
-              <input id="event-type-check-in-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="check-in">
-              <label class="event__type-label  event__type-label--check-in" for="event-type-check-in-1">Check-in</label>
-            </div>
-
-            <div class="event__type-item">
-              <input id="event-type-sightseeing-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="sightseeing">
-              <label class="event__type-label  event__type-label--sightseeing" for="event-type-sightseeing-1">Sightseeing</label>
-            </div>
-
-            <div class="event__type-item">
-              <input id="event-type-restaurant-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="restaurant">
-              <label class="event__type-label  event__type-label--restaurant" for="event-type-restaurant-1">Restaurant</label>
-            </div>
+            ${eventsList}
           </fieldset>
         </div>
       </div>
@@ -102,7 +65,7 @@ const CreateEditPointTemplate = (destination, point, offers) => {
           <span class="visually-hidden">Price</span>
           &euro;
         </label>
-        <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="160">
+        <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value=${basePrice}>
       </div>
 
       <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -116,7 +79,7 @@ const CreateEditPointTemplate = (destination, point, offers) => {
         <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
         <div class="event__available-offers">
-        ${offersListChecked}
+        ${offersList}
         </div>
       </section>
 
@@ -130,14 +93,15 @@ const CreateEditPointTemplate = (destination, point, offers) => {
 };
 
 export default class EditPointView extends GetRemoveElement {
-  constructor(destination, point, offers) {
+  constructor(destination, point, offers, allTypes) {
     super();
     this.destination = destination;
     this.point = point;
     this.offers = offers;
+    this.allTypes = allTypes;
   }
 
   getTemplate() {
-    return CreateEditPointTemplate(this.destination, this.point, this.offers);
+    return CreateEditPointTemplate(this.destination, this.point, this.offers, this.allTypes);
   }
 }
