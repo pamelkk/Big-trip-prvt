@@ -3,37 +3,75 @@ import ListPointsView from '../view/points-list-view';
 import PointView from '../view/point-view';
 import EditPointView from '../view/edit-point-view';
 import AddPointView from '../view/add-point-view';
-import { getRandomElement } from '../utils';
 
 export default class AppPresenter {
-  eventListComponent = new ListPointsView();
-  editEventComponent = new EditPointView();
-  addEventComponent = new AddPointView();
+  #eventListComponent = new ListPointsView();
+  #addEventComponent = new AddPointView();
+  #appContainer = null;
+  #pointModel = null;
+  #points = [];
+  #offers = [];
+  #allTypes = [];
+  #destinations = [];
+
+  #renderPoint = (points, destinations, offers, allTypesOfTransport) => {
+    const pointComponent = new PointView(points, destinations, offers, allTypesOfTransport);
+    const editPointComponent = new EditPointView(points, destinations, offers, allTypesOfTransport);
+
+    const replacePointToEditPoint = () => {
+      this.#eventListComponent.element.replaceChild(editPointComponent.element, pointComponent.element);
+    };
+
+    const replaceEditPointToPoint = () => {
+      this.#eventListComponent.element.replaceChild(pointComponent.element, editPointComponent.element);
+    };
+
+    const onEscKeyDown = (evt) => {
+      if (evt.key === 'Escape' || evt.key === 'Esc') {
+        evt.preventDefault();
+        replaceEditPointToPoint();
+        document.removeEventListener('keydown', onEscKeyDown);
+      }
+    };
+
+    pointComponent.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
+      replacePointToEditPoint();
+      document.addEventListener('keydown', onEscKeyDown);
+    });
+
+    editPointComponent.element.querySelector('form').addEventListener('submit', (evt) => {
+      evt.preventDefault();
+      replaceEditPointToPoint();
+      document.removeEventListener('keydown', onEscKeyDown);
+    });
+
+    editPointComponent.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
+      replaceEditPointToPoint();
+      document.removeEventListener('keydown', onEscKeyDown);
+    });
+
+    render(pointComponent, this.#eventListComponent.element);
+  };
 
   init = (appContainer, pointModel) => {
-    this.appContainer = appContainer;
-    this.pointModel = pointModel;
-    this.points = [...pointModel.getPoints()];
-    this.offers = [...pointModel.getOffers()];
-    this.destinations = [...pointModel.getDestinations()];
-    const destinationForEdit = getRandomElement(this.destinations);
-    const pointForEdit = getRandomElement(this.points);
-    const offersForEdit = getRandomElement(this.offers);
+    this.#appContainer = appContainer;
+    this.#pointModel = pointModel;
+    this.#points = [...this.#pointModel.points];
+    this.#offers = [...this.#pointModel.offersList];
+    this.#allTypes = [...this.#pointModel.allTypes];
+    this.#destinations = [...this.#pointModel.destinations];
 
-    render(this.eventListComponent, this.appContainer);
-    render(new EditPointView(destinationForEdit, pointForEdit, offersForEdit), this.eventListComponent.getElement());
-    render(this.addEventComponent, this.eventListComponent.getElement());
+    render(this.#eventListComponent, this.#appContainer);
+    render(this.#addEventComponent, this.#eventListComponent.element);
 
-    for(let i = 0; i < this.points.length; i++) {
-      for (let j = 0; j < this.offers.length; j++) {
-        const destination = this.destinations.find((item) => item.id === this.points[i].destination);
+    for(let i = 0; i < this.#points.length; i++) {
+      const destination = this.#destinations.find((item) => item.id === this.#points[i].destination);
 
-        const selectedOffers = this.offers.filter((item) => item.type === this.points[i].type);
+      const selectedOffers = this.#offers.find((item) => item.type === this.#points[i].type);
 
-        this.points[i].offers = selectedOffers;
+      this.#points[i].offers = selectedOffers;
 
-        render(new PointView(this.points[i], destination, selectedOffers), this.eventListComponent.getElement());
-      }
+      this.#renderPoint(this.#points[i], destination, selectedOffers, this.#allTypes);
     }
   };
 }
