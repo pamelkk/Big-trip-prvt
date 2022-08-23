@@ -1,4 +1,4 @@
-import GetRemoveElement from './getOrRemoveElements-view';
+import AbstractionView from './abstraction-view';
 
 const createFiltersTemplate = () => (
   `<form class="trip-filters" action="#" method="get">
@@ -16,7 +16,7 @@ const createFiltersTemplate = () => (
 </form>`
 );
 
-export default class FiltersView extends GetRemoveElement {
+export default class FiltersView extends AbstractionView {
   getTemplate() {
     return createFiltersTemplate();
   }

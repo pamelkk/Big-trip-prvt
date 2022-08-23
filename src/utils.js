@@ -6,7 +6,7 @@ const getRandomElement = (elements) => {
   return randomElement;
 };
 
-const humanizePointDate = (date) => dayjs(date).format('MMM D');
+const humanizePointDate = (date) => dayjs(date).format('DD MMM');
 const humanizePointTime = (time) => dayjs(time).format('HH:MM');
 
 

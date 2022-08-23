@@ -1,4 +1,4 @@
-import GetRemoveElement from './getOrRemoveElements-view';
+import AbstractionView from './abstraction-view';
 
 const createAddPointTemplate = () => (
   `            <li class="trip-events__item">
@@ -165,7 +165,7 @@ const createAddPointTemplate = () => (
 </li>`
 );
 
-export default class AddPointView extends GetRemoveElement {
+export default class AddPointView extends AbstractionView {
   getTemplate() {
     return createAddPointTemplate();
   }

@@ -1,5 +1,5 @@
 import { humanizePointDate, humanizePointTime } from '../utils';
-import GetRemoveElement from './getOrRemoveElements-view';
+import AbstractionView from './abstraction-view';
 
 const createEventTemplate = (point, destination, selectedOffers) => {
   const { type, dateFrom, dateTo, basePrice } = point;
@@ -45,7 +45,7 @@ const createEventTemplate = (point, destination, selectedOffers) => {
   </li>`;
 };
 
-export default class PointView extends GetRemoveElement {
+export default class PointView extends AbstractionView {
   constructor(point, destination, selectedOffers) {
     super();
     this.point = point;

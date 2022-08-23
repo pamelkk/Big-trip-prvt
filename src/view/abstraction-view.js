@@ -1,6 +1,6 @@
 import { createElement } from '../render';
 
-export default class GetRemoveElement {
+export default class AbstractionView {
   #element = null;
 
   get element() {

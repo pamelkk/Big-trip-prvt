@@ -3,12 +3,12 @@ import ListPointsView from '../view/points-list-view';
 import PointView from '../view/point-view';
 import EditPointView from '../view/edit-point-view';
 import AddPointView from '../view/add-point-view';
-import OfferToAddPointView from '../view/offerToAddPoint-view';
+import NoPointsView from '../view/no-points-view';
 
 export default class AppPresenter {
   #eventListComponent = new ListPointsView();
   #addEventComponent = new AddPointView();
-  #offerToAddPointComponent = new OfferToAddPointView();
+  #offerToAddPointComponent = new NoPointsView();
   #appContainer = null;
   #pointModel = null;
   #points = [];

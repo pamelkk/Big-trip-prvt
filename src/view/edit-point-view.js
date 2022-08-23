@@ -1,4 +1,4 @@
-import GetRemoveElement from './getOrRemoveElements-view';
+import AbstractionView from './abstraction-view';
 
 const CreateEditPointTemplate = (point, destination, offers, allTypes) => {
   const {type, basePrice} = point;
@@ -7,7 +7,7 @@ const CreateEditPointTemplate = (point, destination, offers, allTypes) => {
   const offersList = offers.offers.reduce((prev, current) => `
   ${prev}
   <div class="event__offer-selector">
-    <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-1" type="checkbox" name="event-offer-luggage" checked>
+    <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-1" type="checkbox" name="event-offer-luggage">
     <label class="event__offer-label" for="event-offer-luggage-1">
       <span class="event__offer-title">${current.title}</span>
       &plus;&euro;&nbsp;
@@ -92,7 +92,7 @@ const CreateEditPointTemplate = (point, destination, offers, allTypes) => {
 </li>`;
 };
 
-export default class EditPointView extends GetRemoveElement {
+export default class EditPointView extends AbstractionView {
   constructor(destination, point, offers, allTypes) {
     super();
     this.destination = destination;

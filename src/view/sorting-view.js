@@ -1,4 +1,4 @@
-import GetRemoveElement from './getOrRemoveElements-view';
+import AbstractionView from './abstraction-view';
 
 const createSortingTemplate = () => (
   `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
@@ -29,7 +29,7 @@ const createSortingTemplate = () => (
 </form>`
 );
 
-export default class SortingView extends GetRemoveElement {
+export default class SortingView extends AbstractionView {
   getTemplate() {
     return createSortingTemplate();
   }
