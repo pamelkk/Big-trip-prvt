@@ -7,7 +7,6 @@ import NoPointsView from '../view/no-points-view';
 
 export default class AppPresenter {
   #eventListComponent = new ListPointsView();
-  #addEventComponent = new AddPointView();
   #offerToAddPointComponent = new NoPointsView();
   #appContainer = null;
   #pointModel = null;
@@ -63,17 +62,17 @@ export default class AppPresenter {
     this.#destinations = [...this.#pointModel.destinations];
 
     render(this.#eventListComponent, this.#appContainer);
-    render(this.#addEventComponent, this.#eventListComponent.element);
+    render(new AddPointView(this.#destinations, this.#allTypes), this.#eventListComponent.element);
 
     if(this.#points.length === 0) {
       render(this.#offerToAddPointComponent, this.#eventListComponent.element);
     } else {
       for(let i = 0; i < this.#points.length; i++) {
         const destination = this.#destinations.find((item) => item.id === this.#points[i].destination);
-        const selectedOffers = this.#offers.find((item) => item.type === this.#points[i].type);
-        this.#points[i].offers = selectedOffers;
+        const matchedOffers = this.#offers.find((item) => item.type === this.#points[i].type);
+        this.#points[i].offers = matchedOffers;
 
-        const infoPoint = [this.#points[i], destination, selectedOffers, this.#allTypes];
+        const infoPoint = [this.#points[i], destination, matchedOffers, this.#allTypes];
 
         this.#renderPoint(infoPoint);
       }

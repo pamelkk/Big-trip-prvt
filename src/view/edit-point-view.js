@@ -24,7 +24,7 @@ const CreateEditPointTemplate = (infoPoint) => {
   const offersList = offers.offers.reduce((prev, current) => `
   ${prev}
   <div class="event__offer-selector">
-    <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-1" type="checkbox" name="event-offer-luggage" checked>
+    <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-1" type="checkbox" name="event-offer-luggage">
     <label class="event__offer-label" for="event-offer-luggage-1">
       <span class="event__offer-title">${current.title}</span>
       &plus;&euro;&nbsp;
@@ -123,12 +123,12 @@ export default class EditPointView extends AbstractView {
 
   setFormSubmitHandler = (callback) => {
     this._callback.click = callback;
-    this.element.addEventListener('click', this.#clickHandler);
+    this.element.querySelector('form').addEventListener('submit', this.#clickHandler);
   };
 
   setFormClickHandler = (callback) => {
     this._callback.click = callback;
-    this.element.addEventListener('click', this.#clickHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
   };
 
   #clickHandler = (evt) => {
