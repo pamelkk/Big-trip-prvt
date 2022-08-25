@@ -1,14 +1,14 @@
-import { render } from '../render';
+import { render, replace } from '../framework/render';
 import ListPointsView from '../view/points-list-view';
 import PointView from '../view/point-view';
 import EditPointView from '../view/edit-point-view';
 import AddPointView from '../view/add-point-view';
-import OfferToAddPointView from '../view/offerToAddPoint-view';
+import NoPointsView from '../view/no-points-view';
 
 export default class AppPresenter {
   #eventListComponent = new ListPointsView();
   #addEventComponent = new AddPointView();
-  #offerToAddPointComponent = new OfferToAddPointView();
+  #offerToAddPointComponent = new NoPointsView();
   #appContainer = null;
   #pointModel = null;
   #points = [];
@@ -16,16 +16,16 @@ export default class AppPresenter {
   #allTypes = [];
   #destinations = [];
 
-  #renderPoint = (points, destinations, offers, allTypesOfTransport) => {
-    const pointComponent = new PointView(points, destinations, offers, allTypesOfTransport);
-    const editPointComponent = new EditPointView(points, destinations, offers, allTypesOfTransport);
+  #renderPoint = (info) => {
+    const pointComponent = new PointView(info);
+    const editPointComponent = new EditPointView(info);
 
     const replacePointToEditPoint = () => {
-      this.#eventListComponent.element.replaceChild(editPointComponent.element, pointComponent.element);
+      replace(editPointComponent, pointComponent);
     };
 
     const replaceEditPointToPoint = () => {
-      this.#eventListComponent.element.replaceChild(pointComponent.element, editPointComponent.element);
+      replace(pointComponent, editPointComponent);
     };
 
     const onEscKeyDown = (evt) => {
@@ -36,18 +36,17 @@ export default class AppPresenter {
       }
     };
 
-    pointComponent.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
+    pointComponent.setEditClickHandler(() => {
       replacePointToEditPoint();
       document.addEventListener('keydown', onEscKeyDown);
     });
 
-    editPointComponent.element.querySelector('form').addEventListener('submit', (evt) => {
-      evt.preventDefault();
+    editPointComponent.setFormSubmitHandler(() => {
       replaceEditPointToPoint();
       document.removeEventListener('keydown', onEscKeyDown);
     });
 
-    editPointComponent.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
+    editPointComponent.setFormClickHandler(() => {
       replaceEditPointToPoint();
       document.removeEventListener('keydown', onEscKeyDown);
     });
@@ -74,7 +73,9 @@ export default class AppPresenter {
         const selectedOffers = this.#offers.find((item) => item.type === this.#points[i].type);
         this.#points[i].offers = selectedOffers;
 
-        this.#renderPoint(this.#points[i], destination, selectedOffers, this.#allTypes);
+        const infoPoint = [this.#points[i], destination, selectedOffers, this.#allTypes];
+
+        this.#renderPoint(infoPoint);
       }
     }
   };
