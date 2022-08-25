@@ -1,7 +1,24 @@
-import GetRemoveElement from './getOrRemoveElements-view';
+import AbstractView from '../framework/view/abstract-view';
+import { getRandomElement, getRandomInteger } from '../utils';
+import {TYPE_OF_TRANSPORT} from '../mock/const';
 
-const CreateEditPointTemplate = (point, destination, offers, allTypes) => {
-  const {type, basePrice} = point;
+const BLANK_POINT = {
+  basePrice: getRandomInteger(100, 2000),
+  dateFrom: '2019-07-11T22:55:56.845Z',
+  dateTo: '2019-07-16T11:22:13.375Z',
+  destination: getRandomInteger(1, 3),
+  id: '0',
+  offers: null,
+  type: getRandomElement(TYPE_OF_TRANSPORT),
+};
+
+const CreateEditPointTemplate = (infoPoint) => {
+  const points = infoPoint[0];
+  const destination = infoPoint[1];
+  const offers = infoPoint[2];
+  const allTypes = infoPoint[3];
+
+  const {type, basePrice} = points;
   const {name, description} = destination;
 
   const offersList = offers.offers.reduce((prev, current) => `
@@ -92,16 +109,30 @@ const CreateEditPointTemplate = (point, destination, offers, allTypes) => {
 </li>`;
 };
 
-export default class EditPointView extends GetRemoveElement {
-  constructor(destination, point, offers, allTypes) {
+export default class EditPointView extends AbstractView {
+  #infoPoint = null;
+
+  constructor(infoPoint = BLANK_POINT) {
     super();
-    this.destination = destination;
-    this.point = point;
-    this.offers = offers;
-    this.allTypes = allTypes;
+    this.#infoPoint = infoPoint;
   }
 
-  getTemplate() {
-    return CreateEditPointTemplate(this.destination, this.point, this.offers, this.allTypes);
+  get template() {
+    return CreateEditPointTemplate(this.#infoPoint);
   }
+
+  setFormSubmitHandler = (callback) => {
+    this._callback.click = callback;
+    this.element.addEventListener('click', this.#clickHandler);
+  };
+
+  setFormClickHandler = (callback) => {
+    this._callback.click = callback;
+    this.element.addEventListener('click', this.#clickHandler);
+  };
+
+  #clickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.click();
+  };
 }

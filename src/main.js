@@ -1,6 +1,6 @@
 import PointModel from './model/point-model';
 import AppPresenter from './presenter/app-presenter';
-import { render } from './render';
+import { render } from './framework/render';
 import FiltersView from './view/filters-view';
 import SortingView from './view/sorting-view';
 

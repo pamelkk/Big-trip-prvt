@@ -1,11 +1,15 @@
+import AbstractView from '../framework/view/abstract-view';
 import { humanizePointDate, humanizePointTime } from '../utils';
-import GetRemoveElement from './getOrRemoveElements-view';
 
-const createEventTemplate = (point, destination, selectedOffers) => {
-  const { type, dateFrom, dateTo, basePrice } = point;
+const createEventTemplate = (infoPoint) => {
+  const points = infoPoint[0];
+  const destination = infoPoint[1];
+  const offersList = infoPoint[2];
+
+  const { type, dateFrom, dateTo, basePrice } = points;
   const {name} = destination;
 
-  const offers = selectedOffers.offers.reduce((prev, current) => `
+  const offers = offersList.offers.reduce((prev, current) => `
   ${prev}
   <li class='event__offer'>
     <span class='event__offer-title'>${current.title}</span>
@@ -45,15 +49,25 @@ const createEventTemplate = (point, destination, selectedOffers) => {
   </li>`;
 };
 
-export default class PointView extends GetRemoveElement {
-  constructor(point, destination, selectedOffers) {
+export default class PointView extends AbstractView {
+  #infoPoint = [];
+
+  constructor(infoPoint) {
     super();
-    this.point = point;
-    this.destination = destination;
-    this.selectedOffers = selectedOffers;
+    this.#infoPoint = infoPoint;
   }
 
-  getTemplate() {
-    return createEventTemplate(this.point, this.destination, this.selectedOffers);
+  get template() {
+    return createEventTemplate(this.#infoPoint);
   }
+
+  setEditClickHandler = (callback) => {
+    this._callback.click = callback;
+    this.element.addEventListener('click', this.#clickHandler);
+  };
+
+  #clickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.click();
+  };
 }
