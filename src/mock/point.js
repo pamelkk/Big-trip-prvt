@@ -1,4 +1,4 @@
-import { getRandomElement, getRandomInteger } from '../utils';
+import { getArray, getRandomElement, getRandomInteger } from '../utils';
 import { TYPE_OF_TRANSPORT } from './const';
 
 export const generatePoint = () => ({
@@ -7,6 +7,6 @@ export const generatePoint = () => ({
   dateTo: '2019-07-16T11:22:13.375Z',
   destination: getRandomInteger(1, 3),
   id: '0',
-  offers: null,
+  offers: getArray([1, 5]),
   type: getRandomElement(TYPE_OF_TRANSPORT),
 });

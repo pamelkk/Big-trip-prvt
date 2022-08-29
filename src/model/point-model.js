@@ -1,16 +1,22 @@
 import { offersByType } from '../mock/offers';
 import { destinations } from '../mock/destination';
 import { generatePoint } from '../mock/point';
-import { TYPE_OF_TRANSPORT } from '../mock/const';
+import { SORTING, TYPE_OF_TRANSPORT } from '../mock/const';
 
 export default class PointModel {
   #points = Array.from({length: 3}, generatePoint);
+  #blankPoint = generatePoint();
   #offersList = offersByType;
   #destinations = destinations;
   #allTypes = TYPE_OF_TRANSPORT;
+  #allSortings = SORTING;
 
   get offersList() {
     return this.#offersList;
+  }
+
+  get allSortings() {
+    return this.#allSortings;
   }
 
   get allTypes() {
@@ -19,6 +25,10 @@ export default class PointModel {
 
   get destinations() {
     return this.#destinations;
+  }
+
+  get blankPoint() {
+    return this.#blankPoint;
   }
 
   get points() {

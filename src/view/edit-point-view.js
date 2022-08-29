@@ -8,24 +8,33 @@ const BLANK_POINT = {
   dateTo: '2019-07-16T11:22:13.375Z',
   destination: getRandomInteger(1, 3),
   id: '0',
-  offers: null,
+  offers: [1],
   type: getRandomElement(TYPE_OF_TRANSPORT),
 };
 
 const CreateEditPointTemplate = (infoPoint) => {
   const points = infoPoint[0];
-  const destination = infoPoint[1];
-  const offers = infoPoint[2];
-  const allTypes = infoPoint[3];
+  const allOffers = infoPoint[1];
+  const allTypes = infoPoint[2];
 
-  const {type, basePrice} = points;
-  const {name, description} = destination;
+  const {type, basePrice, offers, destination} = points;
 
-  const offersList = offers.offers.reduce((prev, current) => `
+  const offersList = allOffers.reduce((prev, current) => `
   ${prev}
   <div class="event__offer-selector">
-    <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-1" type="checkbox" name="event-offer-luggage" checked>
-    <label class="event__offer-label" for="event-offer-luggage-1">
+    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${current.title}-1" type="checkbox" name="event-offer-${current.title}">
+    <label class="event__offer-label" for="event-offer-${current.title}-1">
+      <span class="event__offer-title">${current.title}</span>
+      &plus;&euro;&nbsp;
+      <span class="event__offer-price">${current.price}</span>
+    </label>
+  </div>`, '');
+
+  const offersListChecked = offers.reduce((prev, current) => `
+  ${prev}
+  <div class="event__offer-selector">
+    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${current.title}-1" type="checkbox" name="event-offer-${current.title}" checked>
+    <label class="event__offer-label" for="event-offer-${current.title}-1">
       <span class="event__offer-title">${current.title}</span>
       &plus;&euro;&nbsp;
       <span class="event__offer-price">${current.price}</span>
@@ -61,7 +70,7 @@ const CreateEditPointTemplate = (infoPoint) => {
         <label class="event__label  event__type-output" for="event-destination-1">
         ${type}
         </label>
-        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value=${name} list="destination-list-1">
+        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value=${destination.name} list="destination-list-1">
         <datalist id="destination-list-1">
           <option value="Amsterdam"></option>
           <option value="Geneva"></option>
@@ -96,13 +105,14 @@ const CreateEditPointTemplate = (infoPoint) => {
         <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
         <div class="event__available-offers">
+        ${offersListChecked}
         ${offersList}
         </div>
       </section>
 
       <section class="event__section  event__section--destination">
         <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-        <p class="event__destination-description">${description}</p>
+        <p class="event__destination-description">${destination.description}</p>
       </section>
     </section>
   </form>
@@ -123,12 +133,17 @@ export default class EditPointView extends AbstractView {
 
   setFormSubmitHandler = (callback) => {
     this._callback.click = callback;
-    this.element.addEventListener('click', this.#clickHandler);
+    this.element.querySelector('form').addEventListener('submit', this.#clickHandler);
   };
 
   setFormClickHandler = (callback) => {
     this._callback.click = callback;
-    this.element.addEventListener('click', this.#clickHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
+  };
+
+  setResetFormHandler = (callback) => {
+    this._callback.click = callback;
+    this.element.querySelector('.event__reset-btn').addEventListener('reset', this.#clickHandler);
   };
 
   #clickHandler = (evt) => {

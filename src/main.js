@@ -2,7 +2,6 @@ import PointModel from './model/point-model';
 import AppPresenter from './presenter/app-presenter';
 import { render } from './framework/render';
 import FiltersView from './view/filters-view';
-import SortingView from './view/sorting-view';
 
 const headerElement = document.querySelector('.page-header');
 const mainElement = document.querySelector('.page-main');
@@ -13,6 +12,5 @@ const appPresenter = new AppPresenter();
 const pointModel = new PointModel();
 
 render(new FiltersView(), tripFiltersElement);
-render(new SortingView(), tripEventsElement);
 
 appPresenter.init(tripEventsElement, pointModel);
