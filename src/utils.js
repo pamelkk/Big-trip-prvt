@@ -15,7 +15,7 @@ const getRandomInteger = (min, max) => {
   return Math.floor(randElement);
 };
 
-const getArray = (elements) => [...new Set(elements)].slice(0, getRandomInteger(0, 8));
+const getArray = (elements) => [...new Set(elements)].slice(0, getRandomInteger(0, 2));
 
 export {getRandomElement, humanizePointDate, humanizePointTime, getRandomInteger, getArray};
 
