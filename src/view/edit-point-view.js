@@ -131,9 +131,9 @@ export default class EditPointView extends AbstractView {
     return CreateEditPointTemplate(this.#infoPoint);
   }
 
-  setFormSubmitHandler = (callback) => {
-    this._callback.click = callback;
-    this.element.querySelector('form').addEventListener('submit', this.#clickHandler);
+  setSubmitFormHandler = (callback) => {
+    this._callback.formSubmit = callback;
+    this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
   };
 
   setFormClickHandler = (callback) => {
@@ -142,8 +142,18 @@ export default class EditPointView extends AbstractView {
   };
 
   setResetFormHandler = (callback) => {
-    this._callback.click = callback;
-    this.element.querySelector('.event__reset-btn').addEventListener('reset', this.#clickHandler);
+    this._callback.formReset = callback;
+    this.element.querySelector('form').addEventListener('reset', this.#formResetHandler);
+  };
+
+  #formResetHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.formReset(this.#infoPoint);
+  };
+
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.formSubmit(this.#infoPoint);
   };
 
   #clickHandler = (evt) => {
