@@ -15,7 +15,21 @@ const getRandomInteger = (min, max) => {
   return Math.floor(randElement);
 };
 
+const updatePoint = (items, update) => {
+  const index = items.findIndex((item) => item.id === update.id);
+
+  if (index === -1) {
+    return items;
+  }
+
+  return [
+    ...items.slice(0, index),
+    update,
+    ...items.slice(index + 1),
+  ];
+};
+
 const getArray = (elements) => [...new Set(elements)].slice(0, getRandomInteger(0, 2));
 
-export {getRandomElement, humanizePointDate, humanizePointTime, getRandomInteger, getArray};
+export {getRandomElement, humanizePointDate, humanizePointTime, getRandomInteger, getArray, updatePoint};
 

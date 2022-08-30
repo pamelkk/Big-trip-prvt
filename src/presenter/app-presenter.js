@@ -4,6 +4,7 @@ import AddPointView from '../view/add-point-view';
 import NoPointsView from '../view/no-points-view';
 import SortingView from '../view/sorting-view';
 import PointPresenter from './point-presenter';
+import { updatePoint } from '../utils';
 
 export default class AppPresenter {
   #eventListComponent = new ListPointsView();
@@ -16,10 +17,21 @@ export default class AppPresenter {
   #allTypes = [];
   #allDestinations = [];
   #allSortings = [];
+  #pointPresenter = new Map();
+
+  #handlePointChange = (updatedPoint) => {
+    this.#points = updatePoint(this.#points, updatedPoint);
+    this.#pointPresenter.get(updatedPoint[0].id).init(updatedPoint);
+  };
+
+  #handleModeChange = () => {
+    this.#pointPresenter.forEach((presenter) => presenter.resetView());
+  };
 
   #renderPoint = (info) => {
-    const pointPresenter = new PointPresenter(this.#eventListComponent.element);
+    const pointPresenter = new PointPresenter(this.#eventListComponent.element, this.#handlePointChange, this.#handleModeChange);
     pointPresenter.init(info);
+    this.#pointPresenter.set(info[0].id, pointPresenter);
   };
 
   #renderNoPoints = () => {
@@ -74,6 +86,11 @@ export default class AppPresenter {
 
   #renderSort = () => {
     render(new SortingView(this.#allSortings), this.#appContainer);
+  };
+
+  #clearPointsList = () => {
+    this.#pointPresenter.forEach((presenter) => presenter.destroy());
+    this.#pointPresenter.clear();
   };
 
   init = (appContainer, pointModel) => {
