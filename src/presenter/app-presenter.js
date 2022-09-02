@@ -72,6 +72,7 @@ export default class AppPresenter {
 
   #handlePointChange = (updatedPoint) => {
     this.#points = updatePoint(this.#points, updatedPoint);
+    this.#sourcedPoints = updatePoint(this.#sourcedPoints, updatedPoint);
     this.#pointPresenter.get(updatedPoint[0].id).init(updatedPoint);
   };
 
@@ -132,14 +133,12 @@ export default class AppPresenter {
         const allOffers = getMatchedOffers(this.#offers, point);
         const selectedOffers = getSelectedOffers(allOffers.offers, point.offers);
         let filteredOffers = getNotSelectedOffers(allOffers.offers, selectedOffers);
-        point.offers = selectedOffers;
-        point.destination = destination;
 
         if(selectedOffers.length === 0) {
           filteredOffers = allOffers.offers;
         }
 
-        this.#infoPoint = [point, filteredOffers, this.#allTypes];
+        this.#infoPoint = [point, destination, selectedOffers, filteredOffers, this.#allTypes];
 
         this.#renderPoint(this.#infoPoint);
       }
