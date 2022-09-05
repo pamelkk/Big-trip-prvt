@@ -21,10 +21,6 @@ export default class AppPresenter {
   #matchedOffersForAdd = [];
   #selectedOffersForAdd = [];
   #filteredOffersForAdd = [];
-  #destination = [];
-  #allOffers = [];
-  #selectedOffers = [];
-  #filteredOffers = [];
   #points = [];
   #sourcedPoints = [];
   #offers = [];
@@ -131,16 +127,16 @@ export default class AppPresenter {
       this.#renderNoPoints();
     } else {
       for(const point of this.#points) {
-        this.#destination = getDestination(this.#allDestinations, point);
-        this.#allOffers = getMatchedOffers(this.#offers, point);
-        this.#selectedOffers = getSelectedOffers(this.#allOffers.offers, point.offers);
-        this.#filteredOffers = getNotSelectedOffers(this.#allOffers.offers, this.#selectedOffers);
+        const destination = getDestination(this.#allDestinations, point);
+        const allOffers = getMatchedOffers(this.#offers, point);
+        const selectedOffers = getSelectedOffers(allOffers.offers, point.offers);
+        let filteredOffers = getNotSelectedOffers(allOffers.offers, selectedOffers);
 
-        if(this.#selectedOffers.length === 0) {
-          this.#filteredOffers = this.#allOffers.offers;
+        if(selectedOffers.length === 0) {
+          filteredOffers = allOffers.offers;
         }
 
-        this.#infoPoint = [point, this.#destination, this.#selectedOffers, this.#filteredOffers, this.#allTypes];
+        this.#infoPoint = [point, destination, selectedOffers, filteredOffers, this.#allTypes];
 
         this.#renderPoint(this.#infoPoint);
       }
