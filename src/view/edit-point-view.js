@@ -14,10 +14,12 @@ const BLANK_POINT = {
 
 const CreateEditPointTemplate = (infoPoint) => {
   const points = infoPoint[0];
-  const allOffers = infoPoint[1];
-  const allTypes = infoPoint[2];
+  const destination = infoPoint[1];
+  const selectedOffers = infoPoint[2];
+  const allOffers = infoPoint[3];
+  const allTypes = infoPoint[4];
 
-  const {type, basePrice, offers, destination} = points;
+  const {type, basePrice} = points;
 
   const offersList = allOffers.reduce((prev, current) => `
   ${prev}
@@ -30,7 +32,7 @@ const CreateEditPointTemplate = (infoPoint) => {
     </label>
   </div>`, '');
 
-  const offersListChecked = offers.reduce((prev, current) => `
+  const offersListChecked = selectedOffers.reduce((prev, current) => `
   ${prev}
   <div class="event__offer-selector">
     <input class="event__offer-checkbox  visually-hidden" id="event-offer-${current.title}-1" type="checkbox" name="event-offer-${current.title}" checked>

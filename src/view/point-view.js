@@ -3,10 +3,12 @@ import { humanizePointDate, humanizePointTime } from '../utils';
 
 const createEventTemplate = (infoPoint) => {
   const points = infoPoint[0];
+  const destination = infoPoint[1];
+  const selectedOffers = infoPoint[2];
 
-  const { type, dateFrom, dateTo, basePrice, offers, destination } = points;
+  const { type, dateFrom, dateTo, basePrice } = points;
 
-  const offersList = offers.reduce((prev, current) => `
+  const offersList = selectedOffers.reduce((prev, current) => `
   ${prev}
   <li class='event__offer'>
     <span class='event__offer-title'>${current.title}</span>

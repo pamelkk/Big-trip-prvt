@@ -1,27 +1,90 @@
-import { render } from '../framework/render';
+import { remove, render, RenderPosition } from '../framework/render';
 import ListPointsView from '../view/points-list-view';
 import AddPointView from '../view/add-point-view';
 import NoPointsView from '../view/no-points-view';
 import SortingView from '../view/sorting-view';
 import PointPresenter from './point-presenter';
-import { updatePoint } from '../utils';
+import { getDestination, getNotSelectedOffers, getMatchedOffers, getSelectedOffers, sortPrice, updatePoint } from '../utils';
+import { SortType } from '../mock/const';
 
 export default class AppPresenter {
   #eventListComponent = new ListPointsView();
   #noPointsComponent = new NoPointsView();
+  #sortComponent = null;
+  #addPointComponent = null;
   #appContainer = null;
   #pointModel = null;
   #blankPoint = null;
+  #infoPoint = [];
+  #infoRandomPoint = [];
+  #destinationForAdd = [];
+  #matchedOffersForAdd = [];
+  #selectedOffersForAdd = [];
+  #filteredOffersForAdd = [];
+  #destination = [];
+  #allOffers = [];
+  #selectedOffers = [];
+  #filteredOffers = [];
   #points = [];
+  #sourcedPoints = [];
   #offers = [];
   #allTypes = [];
   #allDestinations = [];
-  #allSortings = [];
   #pointPresenter = new Map();
+  #currentSortType = SortType.DEFAULT;
+
+  init = (appContainer, pointModel) => {
+    this.#appContainer = appContainer;
+    this.#pointModel = pointModel;
+    this.#blankPoint = this.#pointModel.blankPoint;
+    this.#points = [...this.#pointModel.points];
+    this.#sourcedPoints = [...this.#pointModel.points];
+    this.#offers = [...this.#pointModel.offersList];
+    this.#allTypes = [...this.#pointModel.allTypes];
+    this.#allDestinations = [...this.#pointModel.destinations];
+    this.#destinationForAdd = getDestination(this.#allDestinations,this.#blankPoint);
+    this.#matchedOffersForAdd = getMatchedOffers(this.#offers, this.#blankPoint);
+    this.#selectedOffersForAdd = getSelectedOffers(this.#matchedOffersForAdd.offers, this.#blankPoint.offers);
+    this.#filteredOffersForAdd = getNotSelectedOffers(this.#matchedOffersForAdd.offers, this.#selectedOffersForAdd);
+    this.#blankPoint.offers = this.#selectedOffersForAdd;
+    this.#blankPoint.destination = this.#destinationForAdd;
+    if(this.#selectedOffersForAdd.length === 0) {
+      this.#filteredOffersForAdd = this.#matchedOffersForAdd.offers;
+    }
+    this.#infoRandomPoint = [this.#blankPoint, this.#filteredOffersForAdd, this.#allTypes, this.#allDestinations];
+    this.#addPointComponent = new AddPointView(this.#infoRandomPoint);
+    this.#sortComponent = new SortingView();
+
+    this.#renderSort();
+    this.#renderListClass();
+  };
+
+
+  #sortPoints = (sortType) => {
+    switch (sortType) {
+      case SortType.PRICE:
+        this.#points.sort(sortPrice);
+        break;
+      case SortType.DEFAULT:
+        this.#points = [...this.#sourcedPoints];
+    }
+    this.#currentSortType = sortType;
+  };
+
 
   #handlePointChange = (updatedPoint) => {
     this.#points = updatePoint(this.#points, updatedPoint);
+    this.#sourcedPoints = updatePoint(this.#sourcedPoints, updatedPoint);
     this.#pointPresenter.get(updatedPoint[0].id).init(updatedPoint);
+  };
+
+  #handleSortTypeChange = (sortType) => {
+    if(this.#currentSortType === sortType) {
+      return;
+    }
+    this.#sortPoints(sortType);
+    this.#clearPointsList();
+    this.#renderListClass();
   };
 
   #handleModeChange = () => {
@@ -40,25 +103,27 @@ export default class AppPresenter {
 
   #renderListClass = () => {
     render(this.#eventListComponent, this.#appContainer);
-    this.#renderAddPointForm();
     this.#renderPoints();
+
+    const handleClickCreate = () => {
+      this.#renderAddPointForm();
+    };
+
+    const handleResetFormCreate = () => {
+      remove(this.#addPointComponent);
+    };
+
+    const handleSubmitFormCreate = (info) => {
+      this.#renderPoint(info);
+    };
+
+    this.#eventListComponent.setCreateNewPointHandler(handleClickCreate);
+    this.#addPointComponent.setResetNewPointFormHandler(handleResetFormCreate);
+    this.#addPointComponent.setSubmitNewPointFormHandler(handleSubmitFormCreate);
   };
 
   #renderAddPointForm = () => {
-    const destinationForAdd = this.#allDestinations.find((item) => item.id === this.#blankPoint.destination);
-    const allOffersForAdd = this.#offers.find((item) => item.type === this.#blankPoint.type);
-    const selectedOffersForAdd = allOffersForAdd.offers.filter((item) => this.#blankPoint.offers.find((offerId) => offerId === item.id));
-    let filteredOffersForAdd = allOffersForAdd.offers.filter((item) => selectedOffersForAdd.every((offer) => offer.title !== item.title));
-    this.#blankPoint.offers = selectedOffersForAdd;
-    this.#blankPoint.destination = destinationForAdd;
-
-    if(selectedOffersForAdd.length === 0) {
-      filteredOffersForAdd = allOffersForAdd.offers;
-    }
-
-    const infoRandomPoint = [this.#blankPoint, filteredOffersForAdd, this.#allTypes, this.#allDestinations];
-
-    render(new AddPointView(infoRandomPoint), this.#eventListComponent.element);
+    render(this.#addPointComponent, this.#eventListComponent.element, RenderPosition.AFTERBEGIN);
   };
 
   #renderPoints = () => {
@@ -66,44 +131,30 @@ export default class AppPresenter {
       this.#renderNoPoints();
     } else {
       for(const point of this.#points) {
-        const destination = this.#allDestinations.find((item) => item.id === point.destination);
-        const allOffers = this.#offers.find((item) => item.type === point.type);
-        const selectedOffers = allOffers.offers.filter((item) => point.offers.find((offerId) => offerId === item.id));
-        let filteredOffers = allOffers.offers.filter((item) => selectedOffers.every((offer) => offer.title !== item.title));
-        point.offers = selectedOffers;
-        point.destination = destination;
+        this.#destination = getDestination(this.#allDestinations, point);
+        this.#allOffers = getMatchedOffers(this.#offers, point);
+        this.#selectedOffers = getSelectedOffers(this.#allOffers.offers, point.offers);
+        this.#filteredOffers = getNotSelectedOffers(this.#allOffers.offers, this.#selectedOffers);
 
-        if(selectedOffers.length === 0) {
-          filteredOffers = allOffers.offers;
+        if(this.#selectedOffers.length === 0) {
+          this.#filteredOffers = this.#allOffers.offers;
         }
 
-        const infoPoint = [point, filteredOffers, this.#allTypes];
+        this.#infoPoint = [point, this.#destination, this.#selectedOffers, this.#filteredOffers, this.#allTypes];
 
-        this.#renderPoint(infoPoint);
+        this.#renderPoint(this.#infoPoint);
       }
     }
   };
 
   #renderSort = () => {
-    render(new SortingView(this.#allSortings), this.#appContainer);
+    render(this.#sortComponent, this.#appContainer);
+
+    this.#sortComponent.setChangeSortTypeHandler(this.#handleSortTypeChange);
   };
 
   #clearPointsList = () => {
     this.#pointPresenter.forEach((presenter) => presenter.destroy());
     this.#pointPresenter.clear();
-  };
-
-  init = (appContainer, pointModel) => {
-    this.#appContainer = appContainer;
-    this.#pointModel = pointModel;
-    this.#blankPoint = this.#pointModel.blankPoint;
-    this.#points = [...this.#pointModel.points];
-    this.#offers = [...this.#pointModel.offersList];
-    this.#allTypes = [...this.#pointModel.allTypes];
-    this.#allDestinations = [...this.#pointModel.destinations];
-    this.#allSortings = [...this.#pointModel.allSortings];
-
-    this.#renderSort();
-    this.#renderListClass();
   };
 }

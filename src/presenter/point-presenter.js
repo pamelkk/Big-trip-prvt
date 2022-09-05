@@ -27,8 +27,8 @@ export default class PointPresenter {
     const prevEditPointComponent = this.#editPointComponent;
 
     this.#info = info;
-    this.#pointComponent = new PointView(info);
-    this.#editPointComponent = new EditPointView(info);
+    this.#pointComponent = new PointView(this.#info);
+    this.#editPointComponent = new EditPointView(this.#info);
     this.#pointComponent.setEditClickHandler(this.#handleEditClick);
     this.#editPointComponent.setSubmitFormHandler(this.#handleFormSubmit);
     this.#editPointComponent.setResetFormHandler(this.#handleFormReset);

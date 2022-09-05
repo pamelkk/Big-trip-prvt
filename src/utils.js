@@ -29,7 +29,22 @@ const updatePoint = (items, update) => {
   ];
 };
 
+const sortPrice = (pointA, pointB) => {
+  if (pointA.basePrice > pointB.basePrice) {
+    return 1;
+  } else if (pointB.basePrice > pointA.basePrice) {
+    return -1;
+  } else {
+    return 0;
+  }
+};
+
+const getDestination = (all, point) => all.find((item) => item.id === point.destination);
+const getMatchedOffers = (all, point) => all.find((item) => item.type === point.type);
+const getSelectedOffers = (all, point) => all.filter((item) => point.find((offerId) => offerId === item.id));
+const getNotSelectedOffers = (all, select) => all.filter((item) => select.every((offer) => offer.title !== item.title));
+
 const getArray = (elements) => [...new Set(elements)].slice(0, getRandomInteger(0, 2));
 
-export {getRandomElement, humanizePointDate, humanizePointTime, getRandomInteger, getArray, updatePoint};
+export {getRandomElement, humanizePointDate, humanizePointTime, getRandomInteger, getArray, updatePoint, getDestination, getMatchedOffers, getSelectedOffers, getNotSelectedOffers, sortPrice};
 

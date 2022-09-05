@@ -130,4 +130,26 @@ export default class AddPointView extends AbstractView {
   get template() {
     return createAddPointTemplate(this.#infoRandomPoint);
   }
+
+  setResetNewPointFormHandler = (callback) => {
+    this._callback.formReset = callback;
+    this._callback.button = document.querySelector('.trip-main__event-add-btn');
+    this.element.querySelector('form').addEventListener('reset', this.#formResetHandler);
+  };
+
+  setSubmitNewPointFormHandler = (callback) => {
+    this._callback.formSubmit = callback;
+    this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
+  };
+
+  #formResetHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.formReset();
+    this._callback.button.disabled = false;
+  };
+
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.formSubmit(this.#infoRandomPoint);
+  };
 }
