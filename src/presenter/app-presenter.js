@@ -4,7 +4,7 @@ import AddPointView from '../view/add-point-view';
 import NoPointsView from '../view/no-points-view';
 import SortingView from '../view/sorting-view';
 import PointPresenter from './point-presenter';
-import { getDestination, getNotSelectedOffers, getMatchedOffers, getSelectedOffers, sortPrice, updatePoint } from '../utils';
+import { sortPrice, updatePoint, sortTime } from '../utils';
 import { SortType } from '../mock/const';
 
 export default class AppPresenter {
@@ -17,14 +17,6 @@ export default class AppPresenter {
   #blankPoint = null;
   #infoPoint = [];
   #infoRandomPoint = [];
-  #destinationForAdd = [];
-  #matchedOffersForAdd = [];
-  #selectedOffersForAdd = [];
-  #filteredOffersForAdd = [];
-  #destination = [];
-  #allOffers = [];
-  #selectedOffers = [];
-  #filteredOffers = [];
   #points = [];
   #sourcedPoints = [];
   #offers = [];
@@ -42,18 +34,9 @@ export default class AppPresenter {
     this.#offers = [...this.#pointModel.offersList];
     this.#allTypes = [...this.#pointModel.allTypes];
     this.#allDestinations = [...this.#pointModel.destinations];
-    this.#destinationForAdd = getDestination(this.#allDestinations,this.#blankPoint);
-    this.#matchedOffersForAdd = getMatchedOffers(this.#offers, this.#blankPoint);
-    this.#selectedOffersForAdd = getSelectedOffers(this.#matchedOffersForAdd.offers, this.#blankPoint.offers);
-    this.#filteredOffersForAdd = getNotSelectedOffers(this.#matchedOffersForAdd.offers, this.#selectedOffersForAdd);
-    this.#blankPoint.offers = this.#selectedOffersForAdd;
-    this.#blankPoint.destination = this.#destinationForAdd;
-    if(this.#selectedOffersForAdd.length === 0) {
-      this.#filteredOffersForAdd = this.#matchedOffersForAdd.offers;
-    }
-    this.#infoRandomPoint = [this.#blankPoint, this.#filteredOffersForAdd, this.#allTypes, this.#allDestinations];
-    this.#addPointComponent = new AddPointView(this.#infoRandomPoint);
     this.#sortComponent = new SortingView();
+    this.#infoRandomPoint = {point:this.#blankPoint, allOffers:this.#offers, allTypes:this.#allTypes, allDestinations:this.#allDestinations};
+    this.#addPointComponent = new AddPointView(this.#infoRandomPoint);
 
     this.#renderSort();
     this.#renderListClass();
@@ -65,6 +48,9 @@ export default class AppPresenter {
       case SortType.PRICE:
         this.#points.sort(sortPrice);
         break;
+      case SortType.TIME:
+        this.#points.sort(sortTime);
+        break;
       case SortType.DEFAULT:
         this.#points = [...this.#sourcedPoints];
     }
@@ -75,7 +61,7 @@ export default class AppPresenter {
   #handlePointChange = (updatedPoint) => {
     this.#points = updatePoint(this.#points, updatedPoint);
     this.#sourcedPoints = updatePoint(this.#sourcedPoints, updatedPoint);
-    this.#pointPresenter.get(updatedPoint[0].id).init(updatedPoint);
+    this.#pointPresenter.get(updatedPoint.point.id).init(updatedPoint);
   };
 
   #handleSortTypeChange = (sortType) => {
@@ -94,7 +80,7 @@ export default class AppPresenter {
   #renderPoint = (info) => {
     const pointPresenter = new PointPresenter(this.#eventListComponent.element, this.#handlePointChange, this.#handleModeChange);
     pointPresenter.init(info);
-    this.#pointPresenter.set(info[0].id, pointPresenter);
+    this.#pointPresenter.set(info.point.id, pointPresenter);
   };
 
   #renderNoPoints = () => {
@@ -115,6 +101,7 @@ export default class AppPresenter {
 
     const handleSubmitFormCreate = (info) => {
       this.#renderPoint(info);
+      remove(this.#addPointComponent);
     };
 
     this.#eventListComponent.setCreateNewPointHandler(handleClickCreate);
@@ -131,16 +118,7 @@ export default class AppPresenter {
       this.#renderNoPoints();
     } else {
       for(const point of this.#points) {
-        this.#destination = getDestination(this.#allDestinations, point);
-        this.#allOffers = getMatchedOffers(this.#offers, point);
-        this.#selectedOffers = getSelectedOffers(this.#allOffers.offers, point.offers);
-        this.#filteredOffers = getNotSelectedOffers(this.#allOffers.offers, this.#selectedOffers);
-
-        if(this.#selectedOffers.length === 0) {
-          this.#filteredOffers = this.#allOffers.offers;
-        }
-
-        this.#infoPoint = [point, this.#destination, this.#selectedOffers, this.#filteredOffers, this.#allTypes];
+        this.#infoPoint = {point, allOffers:this.#offers, allTypes:this.#allTypes, allDestinations:this.#allDestinations};
 
         this.#renderPoint(this.#infoPoint);
       }

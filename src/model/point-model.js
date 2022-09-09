@@ -2,9 +2,10 @@ import { offersByType } from '../mock/offers';
 import { destinations } from '../mock/destination';
 import { generatePoint } from '../mock/point';
 import { TYPE_OF_TRANSPORT } from '../mock/const';
+import { sortDate } from '../utils';
 
 export default class PointModel {
-  #points = Array.from({length: 3}, generatePoint);
+  #points = Array.from({length: 3}, generatePoint).sort(sortDate);
   #blankPoint = generatePoint();
   #offersList = offersByType;
   #destinations = destinations;

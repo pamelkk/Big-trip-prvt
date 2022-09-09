@@ -4,7 +4,7 @@ export const destinations = [{
   name: 'Chamonix',
   pictures: [
     {
-      src: 'http://picsum.photos/300/200?r=0.0762563005163317',
+      src: 'http://picsum.photos/300/200?r=0.0762563005163315',
       description: 'Chamonix parliament building'
     }
   ]
@@ -15,7 +15,7 @@ export const destinations = [{
   name: 'Amsterdam',
   pictures: [
     {
-      src: 'http://picsum.photos/300/200?r=0.0762563005163317',
+      src: 'http://picsum.photos/300/200?r=0.0762563005163316',
       description: 'Sed sed nisi sed augue convallis suscipit in sed felis.'
     }
   ]

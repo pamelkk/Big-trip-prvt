@@ -1,23 +1,31 @@
-import AbstractView from '../framework/view/abstract-view';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view';
+import { getDestinationById, getDestinationByName, getMatchedOffersByType, getNotSelectedOffers, getNotSelectedTypes, getSelectedOffers } from '../utils';
 
 const createAddPointTemplate = (infoRandomPoint) => {
-  const point = infoRandomPoint[0];
-  const allOffers = infoRandomPoint[1];
-  const allTypes = infoRandomPoint[2];
-  const allDestinations = infoRandomPoint[3];
+  const {point, allOffers, allTypes, newType, newDestination, allDestinations} = infoRandomPoint;
 
-  const {type, basePrice, offers, destination} = point;
+  const {type, basePrice} = point;
+
+  const matchedOffers = newType === null ? getMatchedOffersByType(allOffers, point.type) : getMatchedOffersByType(allOffers, newType);
+  const selectedOffers = newType === null ? getSelectedOffers(matchedOffers.offers, point.offers) : '';
+  const notSelectedOffers = selectedOffers.length === 0 ? matchedOffers.offers : getNotSelectedOffers(matchedOffers.offers, selectedOffers);
+  const destination = newDestination === null ? getDestinationById(allDestinations, point.destination) : getDestinationByName(allDestinations, newDestination);
 
   const destinationList = allDestinations.reduce((prev, current) => `
   ${prev}
   <option value=${current.name}></option>`, '');
 
-  const allTypesList = allTypes.reduce((prev, allTransportTypes) => `
+  const allTransportsList = newType === null ? getNotSelectedTypes(allTypes, type).reduce((prev, typeOfTransport) => `
   ${prev}
   <div class="event__type-item">
-  <input id="event-type-${allTransportTypes}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${allTransportTypes}">
-  <label class="event__type-label  event__type-label--${allTransportTypes}" for="event-type-${allTransportTypes}-1">${allTransportTypes}</label>
-</div>`, '');
+  <input id="event-type-${typeOfTransport}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${typeOfTransport}">
+  <label class="event__type-label  event__type-label--${typeOfTransport}" for="event-type-${typeOfTransport}-1">${typeOfTransport}</label>
+  </div>`, '') : getNotSelectedTypes(allTypes, newType).reduce((prev, typeOfTransport) => `
+  ${prev}
+  <div class="event__type-item">
+  <input id="event-type-${typeOfTransport}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${typeOfTransport}">
+  <label class="event__type-label  event__type-label--${typeOfTransport}" for="event-type-${typeOfTransport}-1">${typeOfTransport}</label>
+  </div>`, '');
 
   const destinationPhotos = destination.pictures.reduce((prev, photo) => `
   ${prev}
@@ -25,7 +33,7 @@ const createAddPointTemplate = (infoRandomPoint) => {
   <img class="event__photo" src=${photo.src} alt="Event photo">
   </div>`, '');
 
-  const offersList = allOffers.reduce((prev, current) => `
+  const offersListUnchecked = notSelectedOffers.reduce((prev, current) => `
   ${prev}
   <div class="event__offer-selector">
   <input class="event__offer-checkbox  visually-hidden" id="event-offer-${current.title}-1" type="checkbox" name="event-offer-${current.title}">
@@ -36,7 +44,7 @@ const createAddPointTemplate = (infoRandomPoint) => {
   </label>
 </div>`, '');
 
-  const offersListChecked = offers.reduce((prev, current) => `
+  const offersListChecked = selectedOffers === '' ? '' : selectedOffers.reduce((prev, current) => `
   ${prev}
   <div class="event__offer-selector">
   <input class="event__offer-checkbox  visually-hidden" id="event-offer-${current.title}-1" type="checkbox" name="event-offer-${current.title}" checked>
@@ -53,27 +61,32 @@ const createAddPointTemplate = (infoRandomPoint) => {
       <div class="event__type-wrapper">
         <label class="event__type  event__type-btn" for="event-type-toggle-1">
           <span class="visually-hidden">Choose event type</span>
-          <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
+          ${newType === null ? `<img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">` : `<img class="event__type-icon" width="17" height="17" src="img/icons/${newType}.png" alt="Event type icon">`}
         </label>
         <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
 
         <div class="event__type-list">
           <fieldset class="event__type-group">
             <legend class="visually-hidden">Event type</legend>
-            ${allTypesList}
-            <div class="event__type-item">
-              <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" checked>
-              <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1">${type}</label>
-            </div>
+            ${newType === null ? `<div class="event__type-item">
+            <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" checked>
+            <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1">${type}</label>
+            </div>` : `<div class="event__type-item">
+            <input id="event-type-${newType}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${newType}" checked>
+            <label class="event__type-label  event__type-label--${newType}" for="event-type-${newType}-1">${newType}</label>
+            </div>`}
+            ${allTransportsList}
           </fieldset>
         </div>
       </div>
 
       <div class="event__field-group  event__field-group--destination">
-        <label class="event__label  event__type-output" for="event-destination-1">
+        ${newType === null ? `<label class="event__label  event__type-output" for="event-destination-1">
         ${type}
-        </label>
-        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value=${destination.name} list="destination-list-1">
+        </label>` : `<label class="event__label  event__type-output" for="event-destination-1">
+        ${newType}
+        </label>`}
+        ${newDestination === null ? `<input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.name}" list="destination-list-1"/>` : `<input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${newDestination}" list="destination-list-1"></input>`}
         <datalist id="destination-list-1">
         ${destinationList}
         </datalist>
@@ -103,7 +116,7 @@ const createAddPointTemplate = (infoRandomPoint) => {
         <h3 class="event__section-title  event__section-title--offers">Offers</h3>
         <div class="event__available-offers">
           ${offersListChecked}
-          ${offersList}
+          ${offersListUnchecked}
         </div>
       </section>
       <section class="event__section  event__section--destination">
@@ -119,16 +132,15 @@ const createAddPointTemplate = (infoRandomPoint) => {
 </li>`;
 };
 
-export default class AddPointView extends AbstractView {
-  #infoRandomPoint = [];
-
+export default class AddPointView extends AbstractStatefulView {
   constructor(infoRandomPoint) {
     super();
-    this.#infoRandomPoint = infoRandomPoint;
+    this._state = AddPointView.parsePointToState(infoRandomPoint);
+    this.#setInnerHandlers();
   }
 
   get template() {
-    return createAddPointTemplate(this.#infoRandomPoint);
+    return createAddPointTemplate(this._state);
   }
 
   setResetNewPointFormHandler = (callback) => {
@@ -142,6 +154,34 @@ export default class AddPointView extends AbstractView {
     this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
   };
 
+  _restoreHandlers = () => {
+    this.#setInnerHandlers();
+    this.setSubmitFormHandler(this._callback.formSubmit);
+  };
+
+  #setInnerHandlers = () => {
+    this.element.querySelector('.event__type-group').addEventListener('click', this.#typeOfTransportChangeHandler);
+    this.element.querySelector('.event__input--destination').addEventListener('change', this.#typeOfDestinationChangeHandler);
+  };
+
+  #typeOfTransportChangeHandler = (evt) => {
+    if(evt.target.tagName !== 'INPUT') {
+      return;
+    }
+
+    evt.preventDefault();
+    this.updateElement({
+      newType: evt.target.value
+    });
+  };
+
+  #typeOfDestinationChangeHandler = (evt) => {
+    evt.preventDefault();
+    this.updateElement({
+      newDestination: evt.target.value,
+    });
+  };
+
   #formResetHandler = (evt) => {
     evt.preventDefault();
     this._callback.formReset();
@@ -150,6 +190,35 @@ export default class AddPointView extends AbstractView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this._callback.formSubmit(this.#infoRandomPoint);
+    this._callback.button.disabled = false;
+    this._callback.formSubmit(AddPointView.parseStateToPoint(this._state));
+  };
+
+  static parsePointToState = (infoPoint) => ({...infoPoint,
+    newType: null,
+    newDestination: null,
+    newOffers: []
+  });
+
+  static parseStateToPoint = (state) => {
+    const point = {...state};
+
+    if (point.newType !== point.point.type) {
+      point.point.type = point.newType;
+    }
+
+    if (point.newDestination !== point.point.destination) {
+      point.point.destination = point.newDestination;
+    }
+
+    if (point.newOffers !== point.point.offers) {
+      point.point.offers = point.newOffers;
+    }
+
+    delete point.newType;
+    delete point.newOffers;
+    delete point.newDestination;
+
+    return point;
   };
 }
