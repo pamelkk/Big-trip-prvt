@@ -1,4 +1,4 @@
-import { getDestinationById, getDestinationByName, getMatchedOffersByName, getMatchedOffersByType, getNotSelectedOffers, getNotSelectedTypes, getRandomElement, getRandomInteger, getSelectedOffers } from '../utils';
+import { getDestinationById, getDestinationByName, getMatchedOffersByType, getNotSelectedOffers, getNotSelectedTypes, getRandomElement, getRandomInteger, getSelectedOffers } from '../utils';
 import {TYPE_OF_TRANSPORT} from '../mock/const';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 
@@ -13,8 +13,8 @@ const BLANK_POINT = {
 };
 
 const CreateEditPointTemplate = (infoPoint) => {
-  const {point, allOffers, allTypes, newType, newDestination, newOffers, allDestinations} = infoPoint;
-  //console.log(infoPoint)
+  const {point, allOffers, allTypes, newType, newDestination, allDestinations} = infoPoint;
+
   const {type, basePrice} = point;
 
   const matchedOffers = newType === null ? getMatchedOffersByType(allOffers, point.type) : getMatchedOffersByType(allOffers, newType);
@@ -22,9 +22,6 @@ const CreateEditPointTemplate = (infoPoint) => {
   const notSelectedOffers = selectedOffers.length === 0 ? matchedOffers.offers : getNotSelectedOffers(matchedOffers.offers, selectedOffers);
   const destination = newDestination === null ? getDestinationById(allDestinations, point.destination) : getDestinationByName(allDestinations, newDestination);
 
-  //console.log(newOffers)
-  //console.log(selectedOffers)
-  //console.log(getMatchedOffersByName(matchedOffers.offers, newOffers))
 
   const destinationList = allDestinations.reduce((prev, current) => `
   ${prev}
@@ -206,14 +203,13 @@ export default class EditPointView extends AbstractStatefulView {
       return;
     }
 
-    //const checkedInputs = evt.target.checked === true ? console.log("yes") : console.log("no");
+    const checkedInputs = evt.target.checked;
     evt.preventDefault();
     for(const element of checkedInputs) {
       this.updateElement({
         newOffers: [element.name.replace(/event-offer-/i, '')]
       });
     }
-    console.log(this._state)
   };
 
   #typeOfDestinationChangeHandler = (evt) => {
