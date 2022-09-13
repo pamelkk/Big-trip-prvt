@@ -96,7 +96,7 @@ const CreateEditPointTemplate = (infoPoint) => {
           <span class="visually-hidden">Price</span>
           &euro;
         </label>
-        <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value=${basePrice}>
+        <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value=${basePrice}>
       </div>
 
       <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -180,13 +180,12 @@ export default class EditPointView extends AbstractStatefulView {
       return;
     }
 
-    const clickedOfferNumber = [evt.target.id.replace(/event-offer-/i, '')];
+    const clickedOfferNumber = Number(evt.target.id.replace(/event-offer-/i, ''));
     const selectedOffers = [...this._state.point.offers];
     const addSelectedOffer = (all, number) => all.push(number);
     const removeSelectedOffer = (all, number) => all.filter((item) => item !== number);
     const result = selectedOffers.includes(clickedOfferNumber) ? removeSelectedOffer(selectedOffers, clickedOfferNumber) : addSelectedOffer(selectedOffers, clickedOfferNumber);
-
-
+    //console.log(result)
     this.updateElement({
       newOffers: result
     });
