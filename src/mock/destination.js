@@ -4,7 +4,7 @@ export const destinations = [{
   name: 'Chamonix',
   pictures: [
     {
-      src: 'http://picsum.photos/300/200?r=0.0762563005163315',
+      src: 'http://placekitten.com/300/200',
       description: 'Chamonix parliament building'
     }
   ]
@@ -15,7 +15,7 @@ export const destinations = [{
   name: 'Amsterdam',
   pictures: [
     {
-      src: 'http://picsum.photos/300/200?r=0.0762563005163316',
+      src: 'http://placekitten.com/300/200',
       description: 'Sed sed nisi sed augue convallis suscipit in sed felis.'
     }
   ]
@@ -26,7 +26,7 @@ export const destinations = [{
   name: 'Geneva',
   pictures: [
     {
-      src: 'http://picsum.photos/300/200?r=0.0762563005163317',
+      src: 'http://placekitten.com/300/200',
       description: 'Chamonix parliament building'
     }
   ]

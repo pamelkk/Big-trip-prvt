@@ -35,13 +35,17 @@ export default class AppPresenter {
     this.#allTypes = [...this.#pointModel.allTypes];
     this.#allDestinations = [...this.#pointModel.destinations];
     this.#sortComponent = new SortingView();
-    this.#infoRandomPoint = {point:this.#blankPoint, allOffers:this.#offers, allTypes:this.#allTypes, allDestinations:this.#allDestinations};
+    this.#infoRandomPoint = {
+      point:this.#blankPoint,
+      allOffers:this.#offers,
+      allTypes:this.#allTypes,
+      allDestinations:this.#allDestinations
+    };
     this.#addPointComponent = new AddPointView(this.#infoRandomPoint);
 
     this.#renderSort();
     this.#renderListClass();
   };
-
 
   #sortPoints = (sortType) => {
     switch (sortType) {
@@ -56,7 +60,6 @@ export default class AppPresenter {
     }
     this.#currentSortType = sortType;
   };
-
 
   #handlePointChange = (updatedPoint) => {
     this.#points = updatePoint(this.#points, updatedPoint);
@@ -118,7 +121,12 @@ export default class AppPresenter {
       this.#renderNoPoints();
     } else {
       for(const point of this.#points) {
-        this.#infoPoint = {point, allOffers:this.#offers, allTypes:this.#allTypes, allDestinations:this.#allDestinations};
+        this.#infoPoint = {
+          point,
+          allOffers:this.#offers,
+          allTypes:this.#allTypes,
+          allDestinations:this.#allDestinations
+        };
 
         this.#renderPoint(this.#infoPoint);
       }

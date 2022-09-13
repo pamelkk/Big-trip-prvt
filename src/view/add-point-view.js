@@ -1,31 +1,16 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
-import { getDestinationById, getDestinationByName, getMatchedOffersByType, getNotSelectedOffers, getNotSelectedTypes, getSelectedOffers } from '../utils';
+import { getDestinationById, getDestinationByName, getMatchedOffersByType } from '../utils';
 
 const createAddPointTemplate = (infoRandomPoint) => {
   const {point, allOffers, allTypes, newType, newDestination, allDestinations} = infoRandomPoint;
-
   const {type, basePrice} = point;
 
-  const matchedOffers = newType === null ? getMatchedOffersByType(allOffers, point.type) : getMatchedOffersByType(allOffers, newType);
-  const selectedOffers = newType === null ? getSelectedOffers(matchedOffers.offers, point.offers) : '';
-  const notSelectedOffers = selectedOffers.length === 0 ? matchedOffers.offers : getNotSelectedOffers(matchedOffers.offers, selectedOffers);
-  const destination = newDestination === null ? getDestinationById(allDestinations, point.destination) : getDestinationByName(allDestinations, newDestination);
+  const matchedOffers = !newType ? getMatchedOffersByType(allOffers, point.type) : getMatchedOffersByType(allOffers, newType);
+  const destination = !newDestination ? getDestinationById(allDestinations, point.destination) : getDestinationByName(allDestinations, newDestination);
 
   const destinationList = allDestinations.reduce((prev, current) => `
   ${prev}
   <option value=${current.name}></option>`, '');
-
-  const allTransportsList = newType === null ? getNotSelectedTypes(allTypes, type).reduce((prev, typeOfTransport) => `
-  ${prev}
-  <div class="event__type-item">
-  <input id="event-type-${typeOfTransport}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${typeOfTransport}">
-  <label class="event__type-label  event__type-label--${typeOfTransport}" for="event-type-${typeOfTransport}-1">${typeOfTransport}</label>
-  </div>`, '') : getNotSelectedTypes(allTypes, newType).reduce((prev, typeOfTransport) => `
-  ${prev}
-  <div class="event__type-item">
-  <input id="event-type-${typeOfTransport}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${typeOfTransport}">
-  <label class="event__type-label  event__type-label--${typeOfTransport}" for="event-type-${typeOfTransport}-1">${typeOfTransport}</label>
-  </div>`, '');
 
   const destinationPhotos = destination.pictures.reduce((prev, photo) => `
   ${prev}
@@ -33,27 +18,29 @@ const createAddPointTemplate = (infoRandomPoint) => {
   <img class="event__photo" src=${photo.src} alt="Event photo">
   </div>`, '');
 
-  const offersListUnchecked = notSelectedOffers.reduce((prev, current) => `
-  ${prev}
-  <div class="event__offer-selector">
-  <input class="event__offer-checkbox  visually-hidden" id="event-offer-${current.title}-1" type="checkbox" name="event-offer-${current.title}">
-  <label class="event__offer-label" for="event-offer-${current.title}-1">
+  const offersList = matchedOffers.offers.reduce((prev, current) => {
+    const offer = !newType ? point.offers : [];
+    const checked = offer.includes(current.id) ? 'checked' : '';
+    return `
+    ${prev}
+    <div class="event__offer-selector">
+    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${current.title}-1" type="checkbox" name="event-offer-${current.title}" ${checked}>
+    <label class="event__offer-label" for="event-offer-${current.title}-1">
     <span class="event__offer-title">${current.title}</span>
     &plus;&euro;&nbsp;
     <span class="event__offer-price">${current.price}</span>
-  </label>
-</div>`, '');
+    </label>
+  </div>`;}, '');
 
-  const offersListChecked = selectedOffers === '' ? '' : selectedOffers.reduce((prev, current) => `
-  ${prev}
-  <div class="event__offer-selector">
-  <input class="event__offer-checkbox  visually-hidden" id="event-offer-${current.title}-1" type="checkbox" name="event-offer-${current.title}" checked>
-  <label class="event__offer-label" for="event-offer-${current.title}-1">
-    <span class="event__offer-title">${current.title}</span>
-    &plus;&euro;&nbsp;
-    <span class="event__offer-price">${current.price}</span>
-  </label>
-</div>`, '');
+  const transportList = allTypes.reduce((prev, typeOfTransport) => {
+    const transport = !newType ? point.type : newType;
+    const checked = transport.includes(typeOfTransport) ? 'checked' : '';
+    return `
+    ${prev}
+    <div class="event__type-item">
+    <input id="event-type-${typeOfTransport}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${typeOfTransport}" ${checked}>
+    <label class="event__type-label  event__type-label--${typeOfTransport}" for="event-type-${typeOfTransport}-1">${typeOfTransport}</label>
+  </div>`;}, '');
 
   return `<li class="trip-events__item">
   <form class="event event--edit" action="#" method="post">
@@ -61,32 +48,25 @@ const createAddPointTemplate = (infoRandomPoint) => {
       <div class="event__type-wrapper">
         <label class="event__type  event__type-btn" for="event-type-toggle-1">
           <span class="visually-hidden">Choose event type</span>
-          ${newType === null ? `<img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">` : `<img class="event__type-icon" width="17" height="17" src="img/icons/${newType}.png" alt="Event type icon">`}
+          ${!newType ? `<img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">` : `<img class="event__type-icon" width="17" height="17" src="img/icons/${newType}.png" alt="Event type icon">`}
         </label>
         <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
 
         <div class="event__type-list">
           <fieldset class="event__type-group">
             <legend class="visually-hidden">Event type</legend>
-            ${newType === null ? `<div class="event__type-item">
-            <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" checked>
-            <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1">${type}</label>
-            </div>` : `<div class="event__type-item">
-            <input id="event-type-${newType}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${newType}" checked>
-            <label class="event__type-label  event__type-label--${newType}" for="event-type-${newType}-1">${newType}</label>
-            </div>`}
-            ${allTransportsList}
+            ${transportList}
           </fieldset>
         </div>
       </div>
 
       <div class="event__field-group  event__field-group--destination">
-        ${newType === null ? `<label class="event__label  event__type-output" for="event-destination-1">
+        ${!newType ? `<label class="event__label  event__type-output" for="event-destination-1">
         ${type}
         </label>` : `<label class="event__label  event__type-output" for="event-destination-1">
         ${newType}
         </label>`}
-        ${newDestination === null ? `<input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.name}" list="destination-list-1"/>` : `<input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${newDestination}" list="destination-list-1"></input>`}
+        ${!newDestination ? `<input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.name}" list="destination-list-1"/>` : `<input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${newDestination}" list="destination-list-1"></input>`}
         <datalist id="destination-list-1">
         ${destinationList}
         </datalist>
@@ -115,8 +95,7 @@ const createAddPointTemplate = (infoRandomPoint) => {
       <section class="event__section  event__section--offers">
         <h3 class="event__section-title  event__section-title--offers">Offers</h3>
         <div class="event__available-offers">
-          ${offersListChecked}
-          ${offersListUnchecked}
+          ${offersList}
         </div>
       </section>
       <section class="event__section  event__section--destination">
@@ -146,37 +125,35 @@ export default class AddPointView extends AbstractStatefulView {
   setResetNewPointFormHandler = (callback) => {
     this._callback.formReset = callback;
     this._callback.button = document.querySelector('.trip-main__event-add-btn');
-    this.element.querySelector('form').addEventListener('reset', this.#formResetHandler);
   };
 
   setSubmitNewPointFormHandler = (callback) => {
     this._callback.formSubmit = callback;
-    this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
   };
 
   _restoreHandlers = () => {
     this.#setInnerHandlers();
-    this.setSubmitFormHandler(this._callback.formSubmit);
+    this.setSubmitNewPointFormHandler(this._callback.formSubmit);
+    this.setResetNewPointFormHandler(this._callback.formReset);
   };
 
   #setInnerHandlers = () => {
     this.element.querySelector('.event__type-group').addEventListener('click', this.#typeOfTransportChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#typeOfDestinationChangeHandler);
+    this.element.querySelector('form').addEventListener('reset', this.#formResetHandler);
+    this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
   };
 
   #typeOfTransportChangeHandler = (evt) => {
     if(evt.target.tagName !== 'INPUT') {
       return;
     }
-
-    evt.preventDefault();
     this.updateElement({
       newType: evt.target.value
     });
   };
 
   #typeOfDestinationChangeHandler = (evt) => {
-    evt.preventDefault();
     this.updateElement({
       newDestination: evt.target.value,
     });
@@ -201,24 +178,27 @@ export default class AddPointView extends AbstractStatefulView {
   });
 
   static parseStateToPoint = (state) => {
-    const point = {...state};
+    const newState = {...state};
 
-    if (point.newType !== point.point.type) {
-      point.point.type = point.newType;
+    if (newState.newType !== newState.point.type) {
+      newState.point.type = newState.newType;
     }
 
-    if (point.newDestination !== point.point.destination) {
-      point.point.destination = point.newDestination;
+    if (newState.newDestination) {
+      newState.newDestination = (getDestinationByName(newState.allDestinations, newState.newDestination)).id;
+      if (newState.newDestination !== newState.point.destination) {
+        newState.point.destination = newState.newDestination;
+      }
     }
 
-    if (point.newOffers !== point.point.offers) {
-      point.point.offers = point.newOffers;
+    if (newState.newOffers !== newState.point.offers) {
+      newState.point.offers = newState.newOffers;
     }
 
-    delete point.newType;
-    delete point.newOffers;
-    delete point.newDestination;
+    delete newState.newType;
+    delete newState.newOffers;
+    delete newState.newDestination;
 
-    return point;
+    return newState;
   };
 }
