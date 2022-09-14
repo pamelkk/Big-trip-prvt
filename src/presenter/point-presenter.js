@@ -53,6 +53,7 @@ export default class PointPresenter {
 
   resetView = () => {
     if (this.#mode !== Mode.DEFAULT) {
+      this.#editPointComponent.reset(this.#info);
       this.#replaceEditPointToPoint();
     }
   };
@@ -78,6 +79,7 @@ export default class PointPresenter {
   #onEscKeyDownHandler = (evt) => {
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
+      this.#editPointComponent.reset(this.#info);
       this.#replaceEditPointToPoint();
     }
   };

@@ -7,7 +7,8 @@ const getRandomElement = (elements) => {
 };
 
 const humanizePointDate = (date) => dayjs(date).format('MMM D');
-const humanizePointTime = (time) => dayjs(time).format('HH:MM');
+const humanizePointTime = (time) => dayjs(time).format('HH:mm');
+const humanizeEditPointDateTime = (date) => dayjs(date).format('DD/MM/YY HH:mm');
 
 const getRandomInteger = (min, max) => {
   const randElement = min + Math.random() * (max + 1 - min);
@@ -68,5 +69,5 @@ const getNotSelectedTypes = (all, point) => all.filter((item) => item !== point)
 
 const getArray = (elements) => [...new Set(elements)].slice(0, getRandomInteger(0, 2));
 
-export {getRandomElement, humanizePointDate, humanizePointTime, getRandomInteger, getArray, updatePoint, getDestinationById, getDestinationByName, getMatchedOffersByType, getMatchedOffersByName, getSelectedOffers, getNotSelectedOffers, sortPrice, sortDate, sortTime, getNotSelectedTypes};
+export {getRandomElement, humanizeEditPointDateTime, humanizePointDate, humanizePointTime, getRandomInteger, getArray, updatePoint, getDestinationById, getDestinationByName, getMatchedOffersByType, getMatchedOffersByName, getSelectedOffers, getNotSelectedOffers, sortPrice, sortDate, sortTime, getNotSelectedTypes};
 

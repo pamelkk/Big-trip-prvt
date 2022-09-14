@@ -1,12 +1,18 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
-import { getDestinationById, getDestinationByName, getMatchedOffersByType } from '../utils';
+import { getDestinationById, getDestinationByName, getMatchedOffersByType, humanizeEditPointDateTime } from '../utils';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
 
 const createAddPointTemplate = (infoRandomPoint) => {
-  const {point, allOffers, allTypes, newType, newDestination, allDestinations} = infoRandomPoint;
-  const {type, basePrice} = point;
+  const {point, allOffers, allTypes, newType, newDestination, newDateFrom, newDateTo, allDestinations} = infoRandomPoint;
+  const {type, basePrice, dateFrom, dateTo} = point;
 
   const matchedOffers = !newType ? getMatchedOffersByType(allOffers, point.type) : getMatchedOffersByType(allOffers, newType);
   const destination = !newDestination ? getDestinationById(allDestinations, point.destination) : getDestinationByName(allDestinations, newDestination);
+  const dateStart = dateFrom ? humanizeEditPointDateTime(dateFrom) : '';
+  const dateEnd = dateTo ? humanizeEditPointDateTime(dateTo) : '';
+  const newDateStart = newDateFrom ? humanizeEditPointDateTime(newDateFrom) : '';
+  const newDateEnd = newDateTo ? humanizeEditPointDateTime(newDateTo) : '';
 
   const destinationList = allDestinations.reduce((prev, current) => `
   ${prev}
@@ -74,10 +80,10 @@ const createAddPointTemplate = (infoRandomPoint) => {
 
       <div class="event__field-group  event__field-group--time">
         <label class="visually-hidden" for="event-start-time-1">From</label>
-        <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="19/03/19 00:00">
+        ${!newDateFrom ? `<input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dateStart}"/>` : `<input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${newDateStart}"/>`}
         &mdash;
         <label class="visually-hidden" for="event-end-time-1">To</label>
-        <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="19/03/19 00:00">
+        ${!newDateTo ? `<input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dateEnd}"/>` : `<input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${newDateEnd}">`}
       </div>
 
       <div class="event__field-group  event__field-group--price">
@@ -112,15 +118,48 @@ const createAddPointTemplate = (infoRandomPoint) => {
 };
 
 export default class AddPointView extends AbstractStatefulView {
+  #datepickerStart = null;
+  #datepickerEnd = null;
+
   constructor(infoRandomPoint) {
     super();
     this._state = AddPointView.parsePointToState(infoRandomPoint);
+    this.#setStartDatepicker();
+    this.#setEndDatepicker();
     this.#setInnerHandlers();
   }
 
   get template() {
     return createAddPointTemplate(this._state);
   }
+
+  removeElement = () => {
+    super.removeElement();
+
+    if (this.#datepickerStart) {
+      this.#datepickerStart.destroy();
+      this.#datepickerStart = null;
+    }
+
+    if (this.#datepickerEnd) {
+      this.#datepickerEnd.destroy();
+      this.#datepickerEnd = null;
+    }
+  };
+
+  reset = (infoPoint) => {
+    this.updateElement(
+      AddPointView.parsePointToState(infoPoint),
+    );
+  };
+
+  _restoreHandlers = () => {
+    this.#setInnerHandlers();
+    this.setSubmitNewPointFormHandler(this._callback.formSubmit);
+    this.setResetNewPointFormHandler(this._callback.formReset);
+    this.#setStartDatepicker();
+    this.#setEndDatepicker();
+  };
 
   setResetNewPointFormHandler = (callback) => {
     this._callback.formReset = callback;
@@ -131,17 +170,52 @@ export default class AddPointView extends AbstractStatefulView {
     this._callback.formSubmit = callback;
   };
 
-  _restoreHandlers = () => {
-    this.#setInnerHandlers();
-    this.setSubmitNewPointFormHandler(this._callback.formSubmit);
-    this.setResetNewPointFormHandler(this._callback.formReset);
-  };
-
   #setInnerHandlers = () => {
     this.element.querySelector('.event__type-group').addEventListener('click', this.#typeOfTransportChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#typeOfDestinationChangeHandler);
     this.element.querySelector('form').addEventListener('reset', this.#formResetHandler);
     this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
+  };
+
+  #setStartDatepicker = () => {
+    if (this._state.point.dateFrom) {
+      this.#datepickerStart = flatpickr(
+        this.element.querySelector('#event-start-time-1'),
+        {
+          dateFormat: 'd/m/y H:i',
+          enableTime: true,
+          defaultDate: humanizeEditPointDateTime(this._state.point.dateFrom),
+          onChange: this.#dateFromChangeHandler,
+        },
+      );
+    }
+  };
+
+  #setEndDatepicker = () => {
+    if (this._state.point.dateTo) {
+      this.#datepickerEnd = flatpickr(
+        this.element.querySelector('#event-end-time-1'),
+        {
+          dateFormat: 'd/m/y H:i',
+          enableTime: true,
+          defaultDate: humanizeEditPointDateTime(this._state.point.dateTo),
+          minDate: humanizeEditPointDateTime(this._state.point.dateFrom),
+          onChange: this.#dateToChangeHandler,
+        },
+      );
+    }
+  };
+
+  #dateFromChangeHandler = ([userDate]) => {
+    this.updateElement({
+      newDateFrom: userDate,
+    });
+  };
+
+  #dateToChangeHandler = ([userDate]) => {
+    this.updateElement({
+      newDateTo: userDate,
+    });
   };
 
   #typeOfTransportChangeHandler = (evt) => {
@@ -174,7 +248,9 @@ export default class AddPointView extends AbstractStatefulView {
   static parsePointToState = (infoPoint) => ({...infoPoint,
     newType: null,
     newDestination: null,
-    newOffers: []
+    newOffers: [],
+    newDateFrom: null,
+    newDateTo: null,
   });
 
   static parseStateToPoint = (state) => {
@@ -195,9 +271,19 @@ export default class AddPointView extends AbstractStatefulView {
       newState.point.offers = newState.newOffers;
     }
 
+    if (newState.newDateFrom && newState.newDateFrom !== newState.point.dateFrom) {
+      newState.point.dateFrom = newState.newDateFrom;
+    }
+
+    if (newState.newDateTo && newState.newDateTo !== newState.point.dateTo) {
+      newState.point.dateTo = newState.newDateTo;
+    }
+
     delete newState.newType;
     delete newState.newOffers;
     delete newState.newDestination;
+    delete newState.newDateFrom;
+    delete newState.newDateTo;
 
     return newState;
   };
