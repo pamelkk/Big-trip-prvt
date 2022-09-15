@@ -15,7 +15,7 @@ const BLANK_POINT = {
 };
 
 const CreateEditPointTemplate = (infoPoint) => {
-  const {point, allOffers, allTypes, newType, newDateFrom, newDateTo, newDestination, allDestinations} = infoPoint;
+  const {point, allOffers, allTypes, newType, newDateFrom, newDateTo, newOffers, newDestination, allDestinations} = infoPoint;
   const {type, basePrice, dateFrom, dateTo} = point;
 
   const matchedOffers = !newType ? getMatchedOffersByType(allOffers, point.type) : getMatchedOffersByType(allOffers, newType);
@@ -36,7 +36,7 @@ const CreateEditPointTemplate = (infoPoint) => {
   </div>`, '');
 
   const offersList = matchedOffers.offers.reduce((prev, current) => {
-    const offer = !newType ? point.offers : [];
+    const offer = !newType || !newOffers ? point.offers : newOffers;
     const checked = offer.includes(current.id) ? 'checked' : '';
     return `
     ${prev}
@@ -139,7 +139,7 @@ export default class EditPointView extends AbstractStatefulView {
   constructor(infoPoint = BLANK_POINT) {
     super();
     this._state = EditPointView.parsePointToState(infoPoint);
-    //console.log(this._state)
+    //console.log(this._state.point.offers)
     this.#setStartDatepicker();
     this.#setEndDatepicker();
     this.#setInnerHandlers();
@@ -206,7 +206,6 @@ export default class EditPointView extends AbstractStatefulView {
         {
           dateFormat: 'd/m/y H:i',
           enableTime: true,
-          defaultDate: humanizeEditPointDateTime(this._state.point.dateFrom),
           onChange: this.#dateFromChangeHandler,
         },
       );
@@ -220,8 +219,7 @@ export default class EditPointView extends AbstractStatefulView {
         {
           dateFormat: 'd/m/y H:i',
           enableTime: true,
-          defaultDate: humanizeEditPointDateTime(this._state.point.dateTo),
-          minDate: humanizeEditPointDateTime(this._state.point.dateFrom),
+          minDate: !this._state.newDateFrom ? humanizeEditPointDateTime(this._state.point.dateFrom) : humanizeEditPointDateTime(this._state.newDateFrom),
           onChange: this.#dateToChangeHandler,
         },
       );
@@ -255,13 +253,23 @@ export default class EditPointView extends AbstractStatefulView {
     }
 
     const clickedOfferNumber = Number(evt.target.id.replace(/event-offer-/i, ''));
-    const selectedOffers = [...this._state.point.offers];
+    let selectedOffers = [...this._state.point.offers];
     const addSelectedOffer = (all, number) => all.push(number);
     const removeSelectedOffer = (all, number) => all.filter((item) => item !== number);
-    const result = selectedOffers.includes(clickedOfferNumber) ? removeSelectedOffer(selectedOffers, clickedOfferNumber) : addSelectedOffer(selectedOffers, clickedOfferNumber);
-    //console.log(result)
+    //const result = selectedOffers.includes(clickedOfferNumber) ? removeSelectedOffer(selectedOffers, clickedOfferNumber) : addSelectedOffer(selectedOffers, clickedOfferNumber);
+
+    if(selectedOffers.length === 0) {
+      if(selectedOffers.includes(clickedOfferNumber)) {
+        selectedOffers = removeSelectedOffer(selectedOffers, clickedOfferNumber);
+      } else {
+        selectedOffers = addSelectedOffer(selectedOffers, clickedOfferNumber)
+      }
+    } else {
+      selectedOffers = addSelectedOffer(selectedOffers, clickedOfferNumber)
+    }
+
     this.updateElement({
-      newOffers: result
+      newOffers: selectedOffers
     });
   };
 

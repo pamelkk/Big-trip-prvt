@@ -184,7 +184,6 @@ export default class AddPointView extends AbstractStatefulView {
         {
           dateFormat: 'd/m/y H:i',
           enableTime: true,
-          defaultDate: humanizeEditPointDateTime(this._state.point.dateFrom),
           onChange: this.#dateFromChangeHandler,
         },
       );
@@ -198,8 +197,7 @@ export default class AddPointView extends AbstractStatefulView {
         {
           dateFormat: 'd/m/y H:i',
           enableTime: true,
-          defaultDate: humanizeEditPointDateTime(this._state.point.dateTo),
-          minDate: humanizeEditPointDateTime(this._state.point.dateFrom),
+          minDate: !this._state.newDateFrom ? humanizeEditPointDateTime(this._state.point.dateFrom) : humanizeEditPointDateTime(this._state.newDateFrom),
           onChange: this.#dateToChangeHandler,
         },
       );
