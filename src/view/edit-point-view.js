@@ -256,16 +256,17 @@ export default class EditPointView extends AbstractStatefulView {
     let selectedOffers = [...this._state.point.offers];
     const addSelectedOffer = (all, number) => all.push(number);
     const removeSelectedOffer = (all, number) => all.filter((item) => item !== number);
+    //Или такой вариант думала:
     //const result = selectedOffers.includes(clickedOfferNumber) ? removeSelectedOffer(selectedOffers, clickedOfferNumber) : addSelectedOffer(selectedOffers, clickedOfferNumber);
 
     if(selectedOffers.length === 0) {
       if(selectedOffers.includes(clickedOfferNumber)) {
         selectedOffers = removeSelectedOffer(selectedOffers, clickedOfferNumber);
       } else {
-        selectedOffers = addSelectedOffer(selectedOffers, clickedOfferNumber)
+        selectedOffers = addSelectedOffer(selectedOffers, clickedOfferNumber);
       }
     } else {
-      selectedOffers = addSelectedOffer(selectedOffers, clickedOfferNumber)
+      selectedOffers = addSelectedOffer(selectedOffers, clickedOfferNumber);
     }
 
     this.updateElement({
