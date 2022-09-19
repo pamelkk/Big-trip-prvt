@@ -1,6 +1,11 @@
 import dayjs from 'dayjs';
 
-// Рандомное число
+const onEscKeyDownHandler = (evt) => {
+  if (evt.key === 'Escape' || evt.key === 'Esc') {
+    evt.preventDefault();
+  }
+};
+
 const getRandomElement = (elements) => {
   const randomElement = elements[Math.floor(Math.random() * elements.length)];
   return randomElement;
@@ -69,5 +74,5 @@ const getNotSelectedTypes = (all, point) => all.filter((item) => item !== point)
 
 const getArray = (elements) => [...new Set(elements)].slice(0, getRandomInteger(0, 2));
 
-export {getRandomElement, humanizeEditPointDateTime, humanizePointDate, humanizePointTime, getRandomInteger, getArray, updatePoint, getDestinationById, getDestinationByName, getMatchedOffersByType, getMatchedOffersByName, getSelectedOffers, getNotSelectedOffers, sortPrice, sortDate, sortTime, getNotSelectedTypes};
+export {onEscKeyDownHandler, getRandomElement, humanizeEditPointDateTime, humanizePointDate, humanizePointTime, getRandomInteger, getArray, updatePoint, getDestinationById, getDestinationByName, getMatchedOffersByType, getMatchedOffersByName, getSelectedOffers, getNotSelectedOffers, sortPrice, sortDate, sortTime, getNotSelectedTypes};
 

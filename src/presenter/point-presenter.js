@@ -1,4 +1,5 @@
 import { remove, render, replace } from '../framework/render';
+import { onEscKeyDownHandler } from '../utils';
 import EditPointView from '../view/edit-point-view';
 import PointView from '../view/point-view';
 
@@ -63,25 +64,22 @@ export default class PointPresenter {
     remove(this.#editPointComponent);
   };
 
+  #resetRemoveEditPoint = () => {
+    this.#editPointComponent.reset(this.#info);
+    this.#replaceEditPointToPoint();
+  };
+
   #replacePointToEditPoint = () => {
     replace(this.#editPointComponent, this.#pointComponent);
-    document.addEventListener('keydown', this.#onEscKeyDownHandler);
+    document.addEventListener('keydown', onEscKeyDownHandler && this.#resetRemoveEditPoint);
     this.#changeMode();
     this.#mode = Mode.EDITING;
   };
 
   #replaceEditPointToPoint = () => {
     replace(this.#pointComponent, this.#editPointComponent);
-    document.removeEventListener('keydown', this.#onEscKeyDownHandler);
+    document.removeEventListener('keydown', onEscKeyDownHandler && this.#resetRemoveEditPoint);
     this.#mode = Mode.DEFAULT;
-  };
-
-  #onEscKeyDownHandler = (evt) => {
-    if (evt.key === 'Escape' || evt.key === 'Esc') {
-      evt.preventDefault();
-      this.#editPointComponent.reset(this.#info);
-      this.#replaceEditPointToPoint();
-    }
   };
 
   #handleEditClick = () => {

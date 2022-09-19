@@ -15,15 +15,13 @@ const BLANK_POINT = {
 };
 
 const CreateEditPointTemplate = (infoPoint) => {
-  const {point, allOffers, allTypes, newType, newDateFrom, newDateTo, newOffers, newDestination, allDestinations} = infoPoint;
+  const {point, allOffers, allTypes, allDestinations} = infoPoint;
   const {type, basePrice, dateFrom, dateTo} = point;
 
-  const matchedOffers = !newType ? getMatchedOffersByType(allOffers, point.type) : getMatchedOffersByType(allOffers, newType);
-  const destination = !newDestination ? getDestinationById(allDestinations, point.destination) : getDestinationByName(allDestinations, newDestination);
+  const matchedOffers = getMatchedOffersByType(allOffers, point.type);
+  const destination = getDestinationById(allDestinations, point.destination);
   const dateStart = dateFrom ? humanizeEditPointDateTime(dateFrom) : '';
   const dateEnd = dateTo ? humanizeEditPointDateTime(dateTo) : '';
-  const newDateStart = newDateFrom ? humanizeEditPointDateTime(newDateFrom) : '';
-  const newDateEnd = newDateTo ? humanizeEditPointDateTime(newDateTo) : '';
 
   const destinationList = allDestinations.reduce((prev, current) => `
   ${prev}
@@ -36,8 +34,7 @@ const CreateEditPointTemplate = (infoPoint) => {
   </div>`, '');
 
   const offersList = matchedOffers.offers.reduce((prev, current) => {
-    const offer = !newType || !newOffers ? point.offers : newOffers;
-    const checked = offer.includes(current.id) ? 'checked' : '';
+    const checked = point.offers.includes(current.id) ? 'checked' : '';
     return `
     ${prev}
     <div class="event__offer-selector">
@@ -50,8 +47,7 @@ const CreateEditPointTemplate = (infoPoint) => {
   </div>`;}, '');
 
   const transportList = allTypes.reduce((prev, typeOfTransport) => {
-    const transport = !newType ? point.type : newType;
-    const checked = transport.includes(typeOfTransport) ? 'checked' : '';
+    const checked = point.type.includes(typeOfTransport) ? 'checked' : '';
     return `
     ${prev}
     <div class="event__type-item">
@@ -65,7 +61,7 @@ const CreateEditPointTemplate = (infoPoint) => {
       <div class="event__type-wrapper">
         <label class="event__type  event__type-btn" for="event-type-toggle-1">
           <span class="visually-hidden">Choose event type</span>
-          ${!newType ? `<img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">` : `<img class="event__type-icon" width="17" height="17" src="img/icons/${newType}.png" alt="Event type icon">`}
+          <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
         </label>
         <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
 
@@ -78,12 +74,10 @@ const CreateEditPointTemplate = (infoPoint) => {
       </div>
 
       <div class="event__field-group  event__field-group--destination">
-        ${!newType ? `<label class="event__label  event__type-output" for="event-destination-1">
+        <label class="event__label  event__type-output" for="event-destination-1">
         ${type}
-        </label>` : `<label class="event__label  event__type-output" for="event-destination-1">
-        ${newType}
-        </label>`}
-        ${!newDestination ? `<input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.name}" list="destination-list-1"/>` : `<input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${newDestination}" list="destination-list-1"></input>`}
+        </label>
+        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.name}" list="destination-list-1"/>
         <datalist id="destination-list-1">
           ${destinationList}
         </datalist>
@@ -91,10 +85,10 @@ const CreateEditPointTemplate = (infoPoint) => {
 
       <div class="event__field-group  event__field-group--time">
         <label class="visually-hidden" for="event-start-time-1">From</label>
-        ${!newDateFrom ? `<input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dateStart}"/>` : `<input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${newDateStart}"/>`}
+        <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dateStart}"/>
         &mdash;
         <label class="visually-hidden" for="event-end-time-1">To</label>
-        ${!newDateTo ? `<input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dateEnd}"/>` : `<input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${newDateEnd}"/>`}
+        <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dateEnd}"/>
       </div>
 
       <div class="event__field-group  event__field-group--price">
@@ -139,7 +133,7 @@ export default class EditPointView extends AbstractStatefulView {
   constructor(infoPoint = BLANK_POINT) {
     super();
     this._state = EditPointView.parsePointToState(infoPoint);
-    //console.log(this._state.point.offers)
+    //console.log(this._state)
     this.#setStartDatepicker();
     this.#setEndDatepicker();
     this.#setInnerHandlers();
@@ -197,6 +191,7 @@ export default class EditPointView extends AbstractStatefulView {
     this.element.querySelector('form').addEventListener('reset', this.#formResetHandler);
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
     this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
+    this.element.querySelector('#event-price-1').addEventListener('change', this.#priceChangeHandler);
   };
 
   #setStartDatepicker = () => {
@@ -227,14 +222,29 @@ export default class EditPointView extends AbstractStatefulView {
   };
 
   #dateFromChangeHandler = ([userDate]) => {
-    this.updateElement({
-      newDateFrom: userDate,
+    this._setState({
+      point: {
+        ...this._state.point,
+        dateFrom: userDate,
+      },
+    });
+  };
+
+  #priceChangeHandler = (evt) => {
+    this._setState({
+      point: {
+        ...this._state.point,
+        basePrice: evt.target.value,
+      },
     });
   };
 
   #dateToChangeHandler = ([userDate]) => {
-    this.updateElement({
-      newDateTo: userDate,
+    this._setState({
+      point: {
+        ...this._state.point,
+        dateTo: userDate,
+      },
     });
   };
 
@@ -242,42 +252,43 @@ export default class EditPointView extends AbstractStatefulView {
     if(evt.target.tagName !== 'INPUT') {
       return;
     }
-    this.updateElement({
-      newType: evt.target.value,
-    });
+
+    this.updateElement(
+      EditPointView.parseStateToPoint({
+        point: {
+          ...this._state.point,
+          type: evt.target.value,
+        },
+      })
+    );
   };
 
   #typeOfOffersChangeHandler = (evt) => {
-    if(evt.target.tagName !== 'INPUT') {
-      return;
-    }
-
     const clickedOfferNumber = Number(evt.target.id.replace(/event-offer-/i, ''));
     let selectedOffers = [...this._state.point.offers];
-    const addSelectedOffer = (all, number) => all.push(number);
     const removeSelectedOffer = (all, number) => all.filter((item) => item !== number);
-    //Или такой вариант думала:
-    //const result = selectedOffers.includes(clickedOfferNumber) ? removeSelectedOffer(selectedOffers, clickedOfferNumber) : addSelectedOffer(selectedOffers, clickedOfferNumber);
 
-    if(selectedOffers.length === 0) {
-      if(selectedOffers.includes(clickedOfferNumber)) {
-        selectedOffers = removeSelectedOffer(selectedOffers, clickedOfferNumber);
-      } else {
-        selectedOffers = addSelectedOffer(selectedOffers, clickedOfferNumber);
-      }
-    } else {
-      selectedOffers = addSelectedOffer(selectedOffers, clickedOfferNumber);
-    }
+    selectedOffers = selectedOffers.includes(clickedOfferNumber) ? removeSelectedOffer(selectedOffers, clickedOfferNumber) : selectedOffers.push(clickedOfferNumber);
 
-    this.updateElement({
-      newOffers: selectedOffers
-    });
+    this.updateElement(
+      EditPointView.parseStateToPoint({
+        point: {
+          ...this._state.point,
+          offers: [selectedOffers],
+        },
+      })
+    );
   };
 
   #typeOfDestinationChangeHandler = (evt) => {
-    this.updateElement({
-      newDestination: evt.target.value,
-    });
+    this.updateElement(
+      EditPointView.parseStateToPoint({
+        point: {
+          ...this._state.point,
+          destination: getDestinationByName(this._state.allDestinations, evt.target.value).id
+        },
+      })
+    );
   };
 
   #formResetHandler = (evt) => {
@@ -295,46 +306,10 @@ export default class EditPointView extends AbstractStatefulView {
     this._callback.click();
   };
 
-  static parsePointToState = (infoPoint) => ({...infoPoint,
-    newType: null,
-    newDestination: null,
-    newOffers: [],
-    newDateFrom: null,
-    newDateTo: null,
-  });
+  static parsePointToState = (infoPoint) => ({...infoPoint});
 
   static parseStateToPoint = (state) => {
     const newState = {...state};
-
-    if (newState.newType && newState.newType !== newState.point.type) {
-      newState.point.type = newState.newType;
-    }
-
-    if (newState.newDestination) {
-      newState.newDestination = (getDestinationByName(newState.allDestinations, newState.newDestination)).id;
-      if (newState.newDestination !== newState.point.destination) {
-        newState.point.destination = newState.newDestination;
-      }
-    }
-
-    if (newState.newOffers !== newState.point.offers) {
-      newState.point.offers = newState.newOffers;
-    }
-
-    if (newState.newDateFrom && newState.newDateFrom !== newState.point.dateFrom) {
-      newState.point.dateFrom = newState.newDateFrom;
-    }
-
-    if (newState.newDateTo && newState.newDateTo !== newState.point.dateTo) {
-      newState.point.dateTo = newState.newDateTo;
-    }
-
-    delete newState.newType;
-    delete newState.newOffers;
-    delete newState.newDestination;
-    delete newState.newDateFrom;
-    delete newState.newDateTo;
-
     return newState;
   };
 }

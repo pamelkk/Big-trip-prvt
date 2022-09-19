@@ -3,7 +3,6 @@ import { getDestinationById, getMatchedOffersByType, getSelectedOffers, humanize
 
 const createEventTemplate = (infoPoint) => {
   const {point, allOffers, allDestinations} = infoPoint;
-
   const { type, dateFrom, dateTo, basePrice } = point;
 
   const matchedOffers = getMatchedOffersByType(allOffers, point.type);
