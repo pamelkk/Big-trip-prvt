@@ -14,7 +14,7 @@ const createSortingTemplate = () => (
 </div>
 
 <div class="trip-sort__item  trip-sort__item--${SortType.TIME}">
-  <input id="sort-${SortType.TIME}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-${SortType.TIME}" disabled>
+  <input id="sort-${SortType.TIME}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-${SortType.TIME}">
   <label class="trip-sort__btn" for="sort-${SortType.TIME}" data-sort-type="${SortType.TIME}">${SortType.TIME}</label>
 </div>
 

@@ -1,12 +1,13 @@
 import AbstractView from '../framework/view/abstract-view';
-import { humanizePointDate, humanizePointTime } from '../utils';
+import { getDestinationById, getMatchedOffersByType, getSelectedOffers, humanizePointDate, humanizePointTime } from '../utils';
 
 const createEventTemplate = (infoPoint) => {
-  const points = infoPoint[0];
-  const destination = infoPoint[1];
-  const selectedOffers = infoPoint[2];
+  const {point, allOffers, allDestinations} = infoPoint;
+  const { type, dateFrom, dateTo, basePrice } = point;
 
-  const { type, dateFrom, dateTo, basePrice } = points;
+  const matchedOffers = getMatchedOffersByType(allOffers, point.type);
+  const selectedOffers = getSelectedOffers(matchedOffers.offers, point.offers);
+  const destination = getDestinationById(allDestinations, point.destination);
 
   const offersList = selectedOffers.reduce((prev, current) => `
   ${prev}
