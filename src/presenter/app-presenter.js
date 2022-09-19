@@ -76,10 +76,10 @@ export default class AppPresenter {
         this.#pointPresenter.get(data.id).init(data);
         break;
       case UpdateType.MINOR:
-        this.#pointModel.deletePoint(updateType, update);
+        this.#pointModel.deletePoint(updateType, data);
         break;
       case UpdateType.MAJOR:
-        this.#pointModel.addPoint(updateType, update);
+        this.#pointModel.addPoint(updateType, data);
         break;
     }
   };
