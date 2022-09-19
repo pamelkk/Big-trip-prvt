@@ -194,7 +194,7 @@ export default class AddPointView extends AbstractStatefulView {
         {
           dateFormat: 'd/m/y H:i',
           enableTime: true,
-          minDate: !this._state.newDateFrom ? humanizeEditPointDateTime(this._state.point.dateFrom) : humanizeEditPointDateTime(this._state.newDateFrom),
+          minDate: humanizeEditPointDateTime(this._state.point.dateFrom),
           onChange: this.#dateToChangeHandler,
         },
       );
@@ -238,6 +238,7 @@ export default class AddPointView extends AbstractStatefulView {
         point: {
           ...this._state.point,
           type: evt.target.value,
+          offers: [],
         },
       })
     );
@@ -277,7 +278,7 @@ export default class AddPointView extends AbstractStatefulView {
 
   #formResetHandler = (evt) => {
     evt.preventDefault();
-    this._callback.formReset();
+    this._callback.formReset(AddPointView.parseStateToPoint(this._state));
     this._callback.button.disabled = false;
   };
 

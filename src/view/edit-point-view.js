@@ -96,7 +96,7 @@ const CreateEditPointTemplate = (infoPoint) => {
           <span class="visually-hidden">Price</span>
           &euro;
         </label>
-        <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value=${basePrice}>
+        <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" min="1" value=${basePrice}>
       </div>
 
       <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -214,7 +214,7 @@ export default class EditPointView extends AbstractStatefulView {
         {
           dateFormat: 'd/m/y H:i',
           enableTime: true,
-          minDate: !this._state.newDateFrom ? humanizeEditPointDateTime(this._state.point.dateFrom) : humanizeEditPointDateTime(this._state.newDateFrom),
+          minDate: humanizeEditPointDateTime(this._state.point.dateFrom),
           onChange: this.#dateToChangeHandler,
         },
       );
@@ -258,6 +258,7 @@ export default class EditPointView extends AbstractStatefulView {
         point: {
           ...this._state.point,
           type: evt.target.value,
+          offers: [],
         },
       })
     );
@@ -293,11 +294,14 @@ export default class EditPointView extends AbstractStatefulView {
 
   #formResetHandler = (evt) => {
     evt.preventDefault();
-    this._callback.formReset();
+    this._callback.formReset(EditPointView.parseStateToPoint(this._state));
   };
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
+    if(this._state.point.dateFrom > this._state.point.dateTo) {
+      throw new Error('The event\'s end date is invalid (can\'t be earlier than event\'s start date)');
+    }
     this._callback.formSubmit(EditPointView.parseStateToPoint(this._state));
   };
 

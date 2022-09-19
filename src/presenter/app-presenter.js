@@ -4,7 +4,7 @@ import AddPointView from '../view/add-point-view';
 import NoPointsView from '../view/no-points-view';
 import SortingView from '../view/sorting-view';
 import PointPresenter from './point-presenter';
-import { sortPrice, sortTime } from '../utils';
+import { sortDate, sortPrice, sortTime } from '../utils';
 import { SortType, UpdateType, UserAction } from '../mock/const';
 
 export default class AppPresenter {
@@ -12,7 +12,7 @@ export default class AppPresenter {
   #pointModel = null;
   #eventListComponent = new ListPointsView();
   #noPointsComponent = new NoPointsView();
-  #sortComponent = new SortingView();
+  #sortComponent = null;
   #addPointComponent = null;
   #blankPoint = null;
   #infoPoint = [];
@@ -32,27 +32,32 @@ export default class AppPresenter {
   get points() {
     switch (this.#currentSortType) {
       case SortType.PRICE:
-        return [this.#pointModel.points].sort(sortPrice);
+        return this.#pointModel.points.sort(sortPrice);
       case SortType.TIME:
-        return [this.#pointModel.points].sort(sortTime);
+        return this.#pointModel.points.sort(sortTime);
+      case SortType.DEFAULT:
+        return this.#pointModel.points.sort(sortDate);
     }
     return this.#pointModel.points;
   }
 
-  init = () => {
-    this.#blankPoint = this.#pointModel.blankPoint;
-    this.#offers = [...this.#pointModel.offersList];
-    this.#allTypes = [...this.#pointModel.allTypes];
-    this.#allDestinations = [...this.#pointModel.destinations];
-    this.#infoRandomPoint = {
-      point:this.#blankPoint,
-      allOffers:this.#offers,
-      allTypes:this.#allTypes,
-      allDestinations:this.#allDestinations
-    };
-    this.#addPointComponent = new AddPointView(this.#infoRandomPoint);
+  get blankPoint () {
+    return this.#pointModel.blankPoint;
+  }
 
-    this.#renderSort();
+  get allTypes () {
+    return this.#pointModel.allTypes;
+  }
+
+  get offers () {
+    return this.#pointModel.offersList;
+  }
+
+  get allDestinations () {
+    return this.#pointModel.destinations;
+  }
+
+  init = () => {
     this.#renderListClass();
   };
 
@@ -73,13 +78,16 @@ export default class AppPresenter {
   #handleModelEvent = (updateType, data) => {
     switch (updateType) {
       case UpdateType.PATCH:
-        this.#pointPresenter.get(data.id).init(data);
+        this.#pointPresenter.get(data.point.id).init(data);
+        this.#addPointComponent = new AddPointView(data);
         break;
       case UpdateType.MINOR:
-        this.#pointModel.deletePoint(updateType, updateType);
+        this.#clearPointsList();
+        this.#renderListClass();
         break;
       case UpdateType.MAJOR:
-        this.#pointModel.addPoint(updateType, data);
+        this.#clearPointsList({resetSortType: true});
+        this.#renderListClass();
         break;
     }
   };
@@ -109,7 +117,9 @@ export default class AppPresenter {
 
   #renderListClass = () => {
     render(this.#eventListComponent, this.#appContainer);
-    this.#renderPoints();
+    this.#renderSort();
+    const points = this.points;
+    this.#renderPoints(points);
 
     const onEscKeyDownHandler = (evt) => {
       if (evt.key === 'Escape' || evt.key === 'Esc') {
@@ -123,6 +133,26 @@ export default class AppPresenter {
       document.addEventListener('keydown', onEscKeyDownHandler);
     };
 
+    this.#eventListComponent.setCreateNewPointHandler(handleClickCreate);
+  };
+
+  #renderAddPointForm = () => {
+    this.#infoRandomPoint = {
+      point:this.blankPoint,
+      allOffers:this.offers,
+      allTypes:this.allTypes,
+      allDestinations:this.allDestinations
+    };
+    this.#addPointComponent = new AddPointView(this.#infoRandomPoint);
+    render(this.#addPointComponent, this.#eventListComponent.element, RenderPosition.AFTERBEGIN);
+
+    const onEscKeyDownHandler = (evt) => {
+      if (evt.key === 'Escape' || evt.key === 'Esc') {
+        evt.preventDefault();
+        remove(this.#addPointComponent);
+      }
+    };
+
     const handleResetFormCreate = () => {
       remove(this.#addPointComponent);
       document.removeEventListener('keydown', onEscKeyDownHandler);
@@ -134,25 +164,20 @@ export default class AppPresenter {
       document.removeEventListener('keydown', onEscKeyDownHandler);
     };
 
-    this.#eventListComponent.setCreateNewPointHandler(handleClickCreate);
     this.#addPointComponent.setResetNewPointFormHandler(handleResetFormCreate);
     this.#addPointComponent.setSubmitNewPointFormHandler(handleSubmitFormCreate);
   };
 
-  #renderAddPointForm = () => {
-    render(this.#addPointComponent, this.#eventListComponent.element, RenderPosition.AFTERBEGIN);
-  };
-
-  #renderPoints = () => {
-    if(this.points.length === 0) {
+  #renderPoints = (points) => {
+    if(points.length === 0) {
       this.#renderNoPoints();
     } else {
-      for(const point of this.points) {
+      for(const point of points) {
         this.#infoPoint = {
           point,
-          allOffers:this.#offers,
-          allTypes:this.#allTypes,
-          allDestinations:this.#allDestinations
+          allOffers:this.offers,
+          allTypes:this.allTypes,
+          allDestinations:this.allDestinations
         };
 
         this.#renderPoint(this.#infoPoint);
@@ -161,13 +186,20 @@ export default class AppPresenter {
   };
 
   #renderSort = () => {
-    render(this.#sortComponent, this.#appContainer);
-
+    this.#sortComponent = new SortingView(this.#currentSortType);
     this.#sortComponent.setChangeSortTypeHandler(this.#handleSortTypeChange);
+    render(this.#sortComponent, this.#appContainer, RenderPosition.AFTERBEGIN);
   };
 
-  #clearPointsList = () => {
+  #clearPointsList = ({resetSortType = false} = {}) => {
     this.#pointPresenter.forEach((presenter) => presenter.destroy());
     this.#pointPresenter.clear();
+
+    remove(this.#sortComponent);
+    remove(this.#noPointsComponent);
+
+    if (resetSortType) {
+      this.#currentSortType = SortType.DEFAULT;
+    }
   };
 }

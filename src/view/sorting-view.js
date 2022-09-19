@@ -1,10 +1,10 @@
 import AbstractView from '../framework/view/abstract-view';
 import { SortType } from '../mock/const';
 
-const createSortingTemplate = () => (
+const createSortingTemplate = (currentSortType) => (
   `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
   <div class="trip-sort__item  trip-sort__item--${SortType.DEFAULT}">
-  <input id="sort-${SortType.DEFAULT}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-day" checked>
+  <input id="sort-${SortType.DEFAULT}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-day" ${currentSortType === SortType.DEFAULT ? 'checked' : ''}>
   <label class="trip-sort__btn" for="sort-${SortType.DEFAULT}" data-sort-type="${SortType.DEFAULT}">${SortType.DEFAULT}</label>
 </div>
 
@@ -14,12 +14,12 @@ const createSortingTemplate = () => (
 </div>
 
 <div class="trip-sort__item  trip-sort__item--${SortType.TIME}">
-  <input id="sort-${SortType.TIME}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-${SortType.TIME}">
+  <input id="sort-${SortType.TIME}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-${SortType.TIME}" ${currentSortType === SortType.TIME ? 'checked' : ''}>
   <label class="trip-sort__btn" for="sort-${SortType.TIME}" data-sort-type="${SortType.TIME}">${SortType.TIME}</label>
 </div>
 
 <div class="trip-sort__item  trip-sort__item--${SortType.PRICE}">
-  <input id="sort-${SortType.PRICE}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-${SortType.PRICE}">
+  <input id="sort-${SortType.PRICE}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-${SortType.PRICE}" ${currentSortType === SortType.PRICE ? 'checked' : ''}>
   <label class="trip-sort__btn" for="sort-${SortType.PRICE}" data-sort-type="${SortType.PRICE}">${SortType.PRICE}</label>
 </div>
 
@@ -31,8 +31,15 @@ const createSortingTemplate = () => (
 );
 
 export default class SortingView extends AbstractView {
+  #currentSortType = null;
+
+  constructor (currentSortType) {
+    super();
+    this.#currentSortType = currentSortType;
+  }
+
   get template() {
-    return createSortingTemplate();
+    return createSortingTemplate(this.#currentSortType);
   }
 
   setChangeSortTypeHandler = (callback) => {
