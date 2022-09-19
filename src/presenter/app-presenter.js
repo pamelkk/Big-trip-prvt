@@ -4,7 +4,7 @@ import AddPointView from '../view/add-point-view';
 import NoPointsView from '../view/no-points-view';
 import SortingView from '../view/sorting-view';
 import PointPresenter from './point-presenter';
-import { sortPrice, updatePoint, sortTime } from '../utils';
+import { sortPrice, sortTime } from '../utils';
 import { SortType, UpdateType, UserAction } from '../mock/const';
 
 export default class AppPresenter {
