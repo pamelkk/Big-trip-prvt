@@ -76,7 +76,7 @@ export default class AppPresenter {
         this.#pointPresenter.get(data.id).init(data);
         break;
       case UpdateType.MINOR:
-        this.#pointModel.deletePoint(updateType, data);
+        this.#pointModel.deletePoint(updateType, updateType);
         break;
       case UpdateType.MAJOR:
         this.#pointModel.addPoint(updateType, data);
