@@ -1,48 +1,57 @@
 import { remove, render, RenderPosition } from '../framework/render';
-import ListPointsView from '../view/points-list-view';
-import AddPointView from '../view/add-point-view';
+import ListPointsView from '../view/list-points-view';
 import NoPointsView from '../view/no-points-view';
 import SortingView from '../view/sorting-view';
 import PointPresenter from './point-presenter';
-import { sortDate, sortPrice, sortTime } from '../utils';
-import { SortType, UpdateType, UserAction } from '../mock/const';
+import { filter, sortDate, sortPrice, sortTime } from '../utils';
+import { FilterType, SortType, UpdateType, UserAction } from '../mock/const';
+import NewPointPresenter from './new-point-presenter';
 
 export default class AppPresenter {
   #appContainer = null;
   #pointModel = null;
+  #filterModel = null;
   #eventListComponent = new ListPointsView();
-  #noPointsComponent = new NoPointsView();
+  #noPointsComponent = null;
   #sortComponent = null;
-  #addPointComponent = null;
-  #blankPoint = null;
   #infoPoint = [];
   #infoRandomPoint = [];
-  #offers = [];
-  #allTypes = [];
-  #allDestinations = [];
   #pointPresenter = new Map();
+  #newPointPresenter = null;
   #currentSortType = SortType.DEFAULT;
 
-  constructor(appContainer, pointModel) {
+  constructor(appContainer, pointModel, filterModel) {
     this.#appContainer = appContainer;
     this.#pointModel = pointModel;
+    this.#filterModel = filterModel;
+
     this.#pointModel.addObserver(this.#handleModelEvent);
+    this.#filterModel.addObserver(this.#handleModelEvent);
+
+    this.#newPointPresenter = new NewPointPresenter(this.#eventListComponent.element, this.#handleViewAction);
   }
 
   get points() {
+    const points = this.#pointModel.points;
+    const filteredPoints = filter[this.currentFilter](points);
+
     switch (this.#currentSortType) {
       case SortType.PRICE:
-        return this.#pointModel.points.sort(sortPrice);
+        return filteredPoints.sort(sortPrice);
       case SortType.TIME:
-        return this.#pointModel.points.sort(sortTime);
+        return filteredPoints.sort(sortTime);
       case SortType.DEFAULT:
-        return this.#pointModel.points.sort(sortDate);
+        return filteredPoints.sort(sortDate);
     }
-    return this.#pointModel.points;
+    return filteredPoints;
   }
 
   get blankPoint () {
     return this.#pointModel.blankPoint;
+  }
+
+  get currentFilter () {
+    return this.#filterModel.currentFilter;
   }
 
   get allTypes () {
@@ -79,7 +88,6 @@ export default class AppPresenter {
     switch (updateType) {
       case UpdateType.PATCH:
         this.#pointPresenter.get(data.point.id).init(data);
-        this.#addPointComponent = new AddPointView(data);
         break;
       case UpdateType.MINOR:
         this.#clearPointsList();
@@ -102,6 +110,7 @@ export default class AppPresenter {
   };
 
   #handleModeChange = () => {
+    this.#newPointPresenter.destroy();
     this.#pointPresenter.forEach((presenter) => presenter.resetView());
   };
 
@@ -112,76 +121,58 @@ export default class AppPresenter {
   };
 
   #renderNoPoints = () => {
+    this.#noPointsComponent = new NoPointsView(this.currentFilter);
     render(this.#noPointsComponent, this.#eventListComponent.element);
   };
 
+  #createPoint = (callback, info) => {
+    this.#currentSortType = SortType.DEFAULT;
+    this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+    this.#newPointPresenter.init(callback, info);
+  };
+
   #renderListClass = () => {
+    const addNewPointButton = document.querySelector('.trip-main__event-add-btn');
+
     render(this.#eventListComponent, this.#appContainer);
     this.#renderSort();
     const points = this.points;
     this.#renderPoints(points);
 
-    const onEscKeyDownHandler = (evt) => {
-      if (evt.key === 'Escape' || evt.key === 'Esc') {
-        evt.preventDefault();
-        remove(this.#addPointComponent);
-      }
-    };
-
-    const handleClickCreate = () => {
-      this.#renderAddPointForm();
-      document.addEventListener('keydown', onEscKeyDownHandler);
-    };
-
-    this.#eventListComponent.setCreateNewPointHandler(handleClickCreate);
-  };
-
-  #renderAddPointForm = () => {
     this.#infoRandomPoint = {
       point:this.blankPoint,
       allOffers:this.offers,
       allTypes:this.allTypes,
       allDestinations:this.allDestinations
     };
-    this.#addPointComponent = new AddPointView(this.#infoRandomPoint);
-    render(this.#addPointComponent, this.#eventListComponent.element, RenderPosition.AFTERBEGIN);
 
-    const onEscKeyDownHandler = (evt) => {
-      if (evt.key === 'Escape' || evt.key === 'Esc') {
-        evt.preventDefault();
-        remove(this.#addPointComponent);
-      }
+    if(points.length === 0) {
+      this.#renderNoPoints();
+      return;
+    }
+
+    const handleNewPointFormClose = () => {
+      addNewPointButton.disabled = false;
     };
 
-    const handleResetFormCreate = () => {
-      remove(this.#addPointComponent);
-      document.removeEventListener('keydown', onEscKeyDownHandler);
+    const handleNewTaskButtonClick = () => {
+      this.#createPoint(handleNewPointFormClose, this.#infoRandomPoint);
+      addNewPointButton.disabled = true;
     };
 
-    const handleSubmitFormCreate = (info) => {
-      this.#renderPoint(info);
-      remove(this.#addPointComponent);
-      document.removeEventListener('keydown', onEscKeyDownHandler);
-    };
-
-    this.#addPointComponent.setResetNewPointFormHandler(handleResetFormCreate);
-    this.#addPointComponent.setSubmitNewPointFormHandler(handleSubmitFormCreate);
+    this.#eventListComponent.setCreateNewPointHandler(handleNewTaskButtonClick);
   };
 
   #renderPoints = (points) => {
-    if(points.length === 0) {
-      this.#renderNoPoints();
-    } else {
-      for(const point of points) {
-        this.#infoPoint = {
-          point,
-          allOffers:this.offers,
-          allTypes:this.allTypes,
-          allDestinations:this.allDestinations
-        };
+    for(const point of points) {
+      this.#infoPoint = {
+        point,
+        allOffers:this.offers,
+        allTypes:this.allTypes,
+        allDestinations:this.allDestinations
+      };
 
-        this.#renderPoint(this.#infoPoint);
-      }
+      this.#renderPoint(this.#infoPoint);
     }
   };
 
@@ -192,11 +183,15 @@ export default class AppPresenter {
   };
 
   #clearPointsList = ({resetSortType = false} = {}) => {
+    this.#newPointPresenter.destroy();
     this.#pointPresenter.forEach((presenter) => presenter.destroy());
     this.#pointPresenter.clear();
 
     remove(this.#sortComponent);
-    remove(this.#noPointsComponent);
+
+    if(this.#noPointsComponent) {
+      remove(this.#noPointsComponent);
+    }
 
     if (resetSortType) {
       this.#currentSortType = SortType.DEFAULT;
