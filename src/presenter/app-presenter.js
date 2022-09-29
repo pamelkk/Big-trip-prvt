@@ -88,6 +88,10 @@ export default class AppPresenter {
     switch (updateType) {
       case UpdateType.PATCH:
         this.#pointPresenter.get(data.point.id).init(data);
+        if(this.currentFilter !== 'everything') {
+          this.#clearPointsList();
+          this.#renderListClass();
+        }
         break;
       case UpdateType.MINOR:
         this.#clearPointsList();

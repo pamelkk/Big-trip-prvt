@@ -1,4 +1,5 @@
 const TYPE_OF_TRANSPORT = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
+const TYPE_OF_CITY = ['Amsterdam', 'Geneva', 'Chamonix'];
 
 const SortType = {
   DEFAULT: 'day',
@@ -37,5 +38,5 @@ const UserAction = {
   ADD_POINT: 'ADD_POINT',
 };
 
-export {TYPE_OF_TRANSPORT, formViewTypeButton, SortType, UpdateType, UserAction, FilterType, NoPointsTextType};
+export {TYPE_OF_TRANSPORT, TYPE_OF_CITY, formViewTypeButton, SortType, UpdateType, UserAction, FilterType, NoPointsTextType};
 

@@ -1,5 +1,5 @@
-import { getDestinationById, getDestinationByName, getMatchedOffersByType, getRandomElement, getRandomInteger, humanizeEditPointDateTime } from '../utils';
-import {TYPE_OF_TRANSPORT} from '../mock/const';
+import { getDestinationById, getDestinationByName, getMatchedOffersByType, getRandomElement, getRandomInteger, humanizeEditPoint, humanizeEditPointDateTime } from '../utils';
+import {TYPE_OF_CITY, TYPE_OF_TRANSPORT} from '../mock/const';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
@@ -293,6 +293,16 @@ export default class EditPointView extends AbstractStatefulView {
   };
 
   #typeOfDestinationChangeHandler = (evt) => {
+    const check = TYPE_OF_CITY.includes(evt.target.value);
+    if(!check) {
+      const errorButton = this.element.querySelector('.event--error');
+      errorButton.textContent = 'Pls select a city from the list';
+      errorButton.style.color = 'red';
+      errorButton.style.padding = '15px';
+      errorButton.style.margin = '0';
+      errorButton.style.fontWeight = 'bold';
+      return;
+    }
     this.updateElement(
       EditPointView.parseStateToPoint({
         point: {
@@ -310,11 +320,15 @@ export default class EditPointView extends AbstractStatefulView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    if(humanizeEditPointDateTime(this._state.point.dateFrom) > humanizeEditPointDateTime(this._state.point.dateTo)) {
+    const isWrongDates = humanizeEditPoint(this._state.point.dateFrom) > humanizeEditPoint(this._state.point.dateTo);
+    if(isWrongDates) {
       const errorButton = this.element.querySelector('.event--error');
       errorButton.textContent = 'The event\'s end date is invalid (can\'t be earlier than event\'s start date)';
       errorButton.style.color = 'red';
+      errorButton.style.padding = '15px';
+      errorButton.style.margin = '0';
       errorButton.style.fontWeight = 'bold';
+      return;
     }
     this._callback.formSubmit(EditPointView.parseStateToPoint(this._state));
   };

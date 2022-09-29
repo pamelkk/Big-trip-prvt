@@ -74,15 +74,15 @@ const getNotSelectedTypes = (all, point) => all.filter((item) => item !== point)
 
 const getArray = (elements) => [...new Set(elements)].slice(0, getRandomInteger(0, 2));
 
-const isPointSameOrAfterToday = (point) => dayjs(humanizeEditPoint(point.dateFrom)).isSameOrAfter(humanizeEditPoint(dayjs(new Date())));
-const isPointEarlierTodayButLonger = (point) => dayjs(humanizeEditPoint(point.dateTo)).isAfter(humanizeEditPoint(dayjs(new Date())));
-const isPointEarlierToday = (point) => dayjs(humanizeEditPoint(dayjs(new Date()))).isAfter(humanizeEditPoint(point.dateTo));
+const isPointSameOrAfterToday = (point) => humanizeEditPoint(point.dateFrom) >= humanizeEditPoint(dayjs(new Date()));
+const isPointLongerToday = (point) => humanizeEditPoint(point.dateTo) > humanizeEditPoint(dayjs(new Date()));
+const isPointEndEarlierToday = (point) => humanizeEditPoint(dayjs(new Date())) > humanizeEditPoint(point.dateTo);
 
 const filter = {
   [FilterType.EVERYTHING]: (points) => points,
-  [FilterType.FUTURE]: (points) => points.filter((point) => isPointSameOrAfterToday(point) || isPointEarlierTodayButLonger(point)),
-  [FilterType.PAST]: (points) => points.filter((point) => isPointEarlierToday(point)),
+  [FilterType.FUTURE]: (points) => points.filter((point) => isPointSameOrAfterToday(point) || isPointLongerToday(point)),
+  [FilterType.PAST]: (points) => points.filter((point) => isPointEndEarlierToday(point)),
 };
 
-export {isEscPressed, getRandomElement, filter, humanizeEditPointDateTime, humanizePointDate, humanizePointTime, getRandomInteger, getArray, updatePoint, getDestinationById, getDestinationByName, getMatchedOffersByType, getMatchedOffersByName, getSelectedOffers, getNotSelectedOffers, sortPrice, sortDate, sortTime, getNotSelectedTypes};
+export {isEscPressed, getRandomElement, filter, humanizeEditPoint, humanizeEditPointDateTime, humanizePointDate, humanizePointTime, getRandomInteger, getArray, updatePoint, getDestinationById, getDestinationByName, getMatchedOffersByType, getMatchedOffersByName, getSelectedOffers, getNotSelectedOffers, sortPrice, sortDate, sortTime, getNotSelectedTypes};
 
