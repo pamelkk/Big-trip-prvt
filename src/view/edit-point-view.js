@@ -1,5 +1,5 @@
-import { getDestinationById, getDestinationByName, getMatchedOffersByType, getRandomElement, getRandomInteger, humanizeEditPointDateTime } from '../utils';
-import {TYPE_OF_TRANSPORT} from '../mock/const';
+import { getDestinationById, getDestinationByName, getMatchedOffersByType, getRandomElement, getRandomInteger, humanizeEditPoint, humanizeEditPointDateTime } from '../utils';
+import {TYPE_OF_CITY, TYPE_OF_TRANSPORT} from '../mock/const';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
@@ -14,7 +14,7 @@ const BLANK_POINT = {
   type: getRandomElement(TYPE_OF_TRANSPORT),
 };
 
-const CreateEditPointTemplate = (infoPoint) => {
+const CreateEditPointTemplate = (infoPoint, formType) => {
   const {point, allOffers, allTypes, allDestinations} = infoPoint;
   const {type, basePrice, dateFrom, dateTo} = point;
 
@@ -57,6 +57,7 @@ const CreateEditPointTemplate = (infoPoint) => {
 
   return `<li class="trip-events__item">
   <form class="event event--edit" action="#" method="post">
+  <p class="event--error"></p>
     <header class="event__header">
       <div class="event__type-wrapper">
         <label class="event__type  event__type-btn" for="event-type-toggle-1">
@@ -96,11 +97,11 @@ const CreateEditPointTemplate = (infoPoint) => {
           <span class="visually-hidden">Price</span>
           &euro;
         </label>
-        <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value=${basePrice}>
+        <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" min="1" value=${basePrice}>
       </div>
 
       <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-      <button class="event__reset-btn" type="reset">Delete</button>
+      <button class="event__reset-btn" type="reset">${formType}</button>
       <button class="event__rollup-btn" type="button">
         <span class="visually-hidden">Open event</span>
       </button>
@@ -130,8 +131,9 @@ export default class EditPointView extends AbstractStatefulView {
   #datepickerStart = null;
   #datepickerEnd = null;
 
-  constructor(infoPoint = BLANK_POINT) {
+  constructor(infoPoint = BLANK_POINT, formType) {
     super();
+    this.formType = formType;
     this._state = EditPointView.parsePointToState(infoPoint);
     //console.log(this._state)
     this.#setStartDatepicker();
@@ -140,7 +142,7 @@ export default class EditPointView extends AbstractStatefulView {
   }
 
   get template() {
-    return CreateEditPointTemplate(this._state);
+    return CreateEditPointTemplate(this._state, this.formType);
   }
 
   removeElement = () => {
@@ -214,7 +216,7 @@ export default class EditPointView extends AbstractStatefulView {
         {
           dateFormat: 'd/m/y H:i',
           enableTime: true,
-          minDate: !this._state.newDateFrom ? humanizeEditPointDateTime(this._state.point.dateFrom) : humanizeEditPointDateTime(this._state.newDateFrom),
+          minDate: humanizeEditPointDateTime(this._state.point.dateFrom),
           onChange: this.#dateToChangeHandler,
         },
       );
@@ -258,29 +260,49 @@ export default class EditPointView extends AbstractStatefulView {
         point: {
           ...this._state.point,
           type: evt.target.value,
+          offers: [],
         },
       })
     );
   };
 
   #typeOfOffersChangeHandler = (evt) => {
-    const clickedOfferNumber = Number(evt.target.id.replace(/event-offer-/i, ''));
+    const target = evt.target.closest('.event__offer-label');
+    if (!target) {
+      return;
+    }
+
+    const clickedOfferNumber = Number(target.htmlFor.replace(/event-offer-/i, ''));
     let selectedOffers = [...this._state.point.offers];
     const removeSelectedOffer = (all, number) => all.filter((item) => item !== number);
 
-    selectedOffers = selectedOffers.includes(clickedOfferNumber) ? removeSelectedOffer(selectedOffers, clickedOfferNumber) : selectedOffers.push(clickedOfferNumber);
+    if(selectedOffers.includes(clickedOfferNumber)) {
+      selectedOffers = removeSelectedOffer(selectedOffers, clickedOfferNumber);
+    } else {
+      selectedOffers.push(clickedOfferNumber);
+    }
 
     this.updateElement(
       EditPointView.parseStateToPoint({
         point: {
           ...this._state.point,
-          offers: [selectedOffers],
+          offers: selectedOffers,
         },
       })
     );
   };
 
   #typeOfDestinationChangeHandler = (evt) => {
+    const check = TYPE_OF_CITY.includes(evt.target.value);
+    if(!check) {
+      const errorButton = this.element.querySelector('.event--error');
+      errorButton.textContent = 'Pls select a city from the list';
+      errorButton.style.color = 'red';
+      errorButton.style.padding = '15px';
+      errorButton.style.margin = '0';
+      errorButton.style.fontWeight = 'bold';
+      return;
+    }
     this.updateElement(
       EditPointView.parseStateToPoint({
         point: {
@@ -293,11 +315,21 @@ export default class EditPointView extends AbstractStatefulView {
 
   #formResetHandler = (evt) => {
     evt.preventDefault();
-    this._callback.formReset();
+    this._callback.formReset(EditPointView.parseStateToPoint(this._state));
   };
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
+    const isWrongDates = humanizeEditPoint(this._state.point.dateFrom) > humanizeEditPoint(this._state.point.dateTo);
+    if(isWrongDates) {
+      const errorButton = this.element.querySelector('.event--error');
+      errorButton.textContent = 'The event\'s end date is invalid (can\'t be earlier than event\'s start date)';
+      errorButton.style.color = 'red';
+      errorButton.style.padding = '15px';
+      errorButton.style.margin = '0';
+      errorButton.style.fontWeight = 'bold';
+      return;
+    }
     this._callback.formSubmit(EditPointView.parseStateToPoint(this._state));
   };
 

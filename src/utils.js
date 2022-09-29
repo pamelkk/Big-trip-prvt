@@ -1,19 +1,19 @@
 import dayjs from 'dayjs';
-
-const onEscKeyDownHandler = (evt) => {
-  if (evt.key === 'Escape' || evt.key === 'Esc') {
-    evt.preventDefault();
-  }
-};
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import { FilterType } from './mock/const';
+dayjs.extend(isSameOrAfter);
 
 const getRandomElement = (elements) => {
   const randomElement = elements[Math.floor(Math.random() * elements.length)];
   return randomElement;
 };
 
+const isEscPressed = (evt) => evt.key === 'Escape' || evt.key === 'Esc';
+
 const humanizePointDate = (date) => dayjs(date).format('MMM D');
 const humanizePointTime = (time) => dayjs(time).format('HH:mm');
 const humanizeEditPointDateTime = (date) => dayjs(date).format('DD/MM/YY HH:mm');
+const humanizeEditPoint = (date) => dayjs(date).format('DD/MM/YY');
 
 const getRandomInteger = (min, max) => {
   const randElement = min + Math.random() * (max + 1 - min);
@@ -74,5 +74,15 @@ const getNotSelectedTypes = (all, point) => all.filter((item) => item !== point)
 
 const getArray = (elements) => [...new Set(elements)].slice(0, getRandomInteger(0, 2));
 
-export {onEscKeyDownHandler, getRandomElement, humanizeEditPointDateTime, humanizePointDate, humanizePointTime, getRandomInteger, getArray, updatePoint, getDestinationById, getDestinationByName, getMatchedOffersByType, getMatchedOffersByName, getSelectedOffers, getNotSelectedOffers, sortPrice, sortDate, sortTime, getNotSelectedTypes};
+const isPointSameOrAfterToday = (point) => humanizeEditPoint(point.dateFrom) >= humanizeEditPoint(dayjs(new Date()));
+const isPointLongerToday = (point) => humanizeEditPoint(point.dateTo) > humanizeEditPoint(dayjs(new Date()));
+const isPointEndEarlierToday = (point) => humanizeEditPoint(dayjs(new Date())) > humanizeEditPoint(point.dateTo);
+
+const filter = {
+  [FilterType.EVERYTHING]: (points) => points,
+  [FilterType.FUTURE]: (points) => points.filter((point) => isPointSameOrAfterToday(point) || isPointLongerToday(point)),
+  [FilterType.PAST]: (points) => points.filter((point) => isPointEndEarlierToday(point)),
+};
+
+export {isEscPressed, getRandomElement, filter, humanizeEditPoint, humanizeEditPointDateTime, humanizePointDate, humanizePointTime, getRandomInteger, getArray, updatePoint, getDestinationById, getDestinationByName, getMatchedOffersByType, getMatchedOffersByName, getSelectedOffers, getNotSelectedOffers, sortPrice, sortDate, sortTime, getNotSelectedTypes};
 

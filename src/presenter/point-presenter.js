@@ -1,5 +1,6 @@
 import { remove, render, replace } from '../framework/render';
-import { onEscKeyDownHandler } from '../utils';
+import { formViewTypeButton, UpdateType, UserAction } from '../mock/const';
+import { isEscPressed } from '../utils';
 import EditPointView from '../view/edit-point-view';
 import PointView from '../view/point-view';
 
@@ -29,7 +30,7 @@ export default class PointPresenter {
 
     this.#info = info;
     this.#pointComponent = new PointView(this.#info);
-    this.#editPointComponent = new EditPointView(this.#info);
+    this.#editPointComponent = new EditPointView(this.#info, formViewTypeButton.EDIT_FORM);
     this.#pointComponent.setEditClickHandler(this.#handleEditClick);
     this.#editPointComponent.setSubmitFormHandler(this.#handleFormSubmit);
     this.#editPointComponent.setResetFormHandler(this.#handleFormReset);
@@ -64,35 +65,39 @@ export default class PointPresenter {
     remove(this.#editPointComponent);
   };
 
-  #resetRemoveEditPoint = () => {
-    this.#editPointComponent.reset(this.#info);
-    this.#replaceEditPointToPoint();
-  };
-
   #replacePointToEditPoint = () => {
     replace(this.#editPointComponent, this.#pointComponent);
-    document.addEventListener('keydown', onEscKeyDownHandler && this.#resetRemoveEditPoint);
+    document.addEventListener('keydown', this.#onEscKeyDownReplaceEditToPoint);
     this.#changeMode();
     this.#mode = Mode.EDITING;
   };
 
   #replaceEditPointToPoint = () => {
     replace(this.#pointComponent, this.#editPointComponent);
-    document.removeEventListener('keydown', onEscKeyDownHandler && this.#resetRemoveEditPoint);
+    document.removeEventListener('keydown', this.#onEscKeyDownReplaceEditToPoint);
     this.#mode = Mode.DEFAULT;
+  };
+
+  #onEscKeyDownReplaceEditToPoint = (evt) => {
+    if (isEscPressed(evt)) {
+      evt.preventDefault();
+      this.#editPointComponent.reset(this.#info);
+      this.#replaceEditPointToPoint();
+    }
   };
 
   #handleEditClick = () => {
     this.#replacePointToEditPoint();
   };
 
-  #handleFormSubmit = (info) => {
-    this.#changeData(info);
+  #handleFormSubmit = (update) => {
+    const isMinorUpdate = this.#info.point.type !== update.point.type || this.#info.point.offers !== update.point.offers || this.#info.point.destination !== update.point.destination;
+    this.#changeData(UserAction.UPDATE_POINT, isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH, update);
     this.#replaceEditPointToPoint();
   };
 
-  #handleFormReset = () => {
-    this.destroy();
+  #handleFormReset = (info) => {
+    this.#changeData(UserAction.DELETE_POINT, UpdateType.MINOR, info);
   };
 
   #handleFormClick = () => {

@@ -1,4 +1,5 @@
 const TYPE_OF_TRANSPORT = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
+const TYPE_OF_CITY = ['Amsterdam', 'Geneva', 'Chamonix'];
 
 const SortType = {
   DEFAULT: 'day',
@@ -6,6 +7,23 @@ const SortType = {
   TIME: 'time',
   PRICE: 'price',
   OFFERS: 'offers'
+};
+
+const FilterType = {
+  EVERYTHING: 'everything',
+  FUTURE: 'future',
+  PAST: 'past'
+};
+
+const formViewTypeButton = {
+  ADD_FORM: 'Cancel',
+  EDIT_FORM: 'Delete',
+};
+
+const NoPointsTextType = {
+  [FilterType.EVERYTHING]: 'Click New Event to create your first point',
+  [FilterType.FUTURE]: 'There are no future events now',
+  [FilterType.PAST]: 'There are no past events now'
 };
 
 const UpdateType = {
@@ -20,5 +38,5 @@ const UserAction = {
   ADD_POINT: 'ADD_POINT',
 };
 
-export {TYPE_OF_TRANSPORT, SortType, UpdateType, UserAction};
+export {TYPE_OF_TRANSPORT, TYPE_OF_CITY, formViewTypeButton, SortType, UpdateType, UserAction, FilterType, NoPointsTextType};
 
