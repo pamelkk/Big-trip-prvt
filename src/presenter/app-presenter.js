@@ -6,22 +6,29 @@ import PointPresenter from './point-presenter';
 import { filter, sortDate, sortPrice, sortTime } from '../utils';
 import { FilterType, SortType, UpdateType, UserAction } from '../mock/const';
 import NewPointPresenter from './new-point-presenter';
+import MainInfoView from '../view/main-info-view';
+import LoadingView from '../view/loading-view';
 
 export default class AppPresenter {
   #appContainer = null;
+  #mainInfoContainer = null;
   #pointModel = null;
   #filterModel = null;
   #eventListComponent = new ListPointsView();
+  #loadingComponent = new LoadingView();
   #noPointsComponent = null;
+  #mainInfoComponent = null;
   #sortComponent = null;
   #infoPoint = [];
   #infoRandomPoint = [];
   #pointPresenter = new Map();
   #newPointPresenter = null;
   #currentSortType = SortType.DEFAULT;
+  #isLoading = true;
 
-  constructor(appContainer, pointModel, filterModel) {
+  constructor(appContainer, pointModel, filterModel, mainInfoContainer) {
     this.#appContainer = appContainer;
+    this.#mainInfoContainer = mainInfoContainer;
     this.#pointModel = pointModel;
     this.#filterModel = filterModel;
 
@@ -54,12 +61,8 @@ export default class AppPresenter {
     return this.#filterModel.currentFilter;
   }
 
-  get allTypes () {
-    return this.#pointModel.allTypes;
-  }
-
   get offers () {
-    return this.#pointModel.offersList;
+    return this.#pointModel.offers;
   }
 
   get allDestinations () {
@@ -101,6 +104,11 @@ export default class AppPresenter {
         this.#clearPointsList({resetSortType: true});
         this.#renderListClass();
         break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
+        this.#renderListClass();
+        break;
     }
   };
 
@@ -124,6 +132,10 @@ export default class AppPresenter {
     this.#pointPresenter.set(info.point.id, pointPresenter);
   };
 
+  #renderLoading = () => {
+    render(this.#loadingComponent, this.#appContainer, RenderPosition.AFTERBEGIN);
+  };
+
   #renderNoPoints = () => {
     this.#noPointsComponent = new NoPointsView(this.currentFilter);
     render(this.#noPointsComponent, this.#eventListComponent.element);
@@ -136,21 +148,23 @@ export default class AppPresenter {
   };
 
   #renderListClass = () => {
-    const addNewPointButton = document.querySelector('.trip-main__event-add-btn');
-
     render(this.#eventListComponent, this.#appContainer);
+    if(this.#isLoading) {
+      this.#renderLoading();
+      return;
+    }
+    const addNewPointButton = document.querySelector('.trip-main__event-add-btn');
+    this.#renderMainInfo();
     this.#renderSort();
-    const points = this.points;
-    this.#renderPoints(points);
+    this.#renderPoints(this.points);
 
     this.#infoRandomPoint = {
       point:this.blankPoint,
       allOffers:this.offers,
-      allTypes:this.allTypes,
       allDestinations:this.allDestinations
     };
 
-    if(points.length === 0) {
+    if(this.points.length === 0) {
       this.#renderNoPoints();
       return;
     }
@@ -159,12 +173,17 @@ export default class AppPresenter {
       addNewPointButton.disabled = false;
     };
 
-    const handleNewTaskButtonClick = () => {
+    const handleNewPointButtonClick = () => {
       this.#createPoint(handleNewPointFormClose, this.#infoRandomPoint);
       addNewPointButton.disabled = true;
     };
 
-    this.#eventListComponent.setCreateNewPointHandler(handleNewTaskButtonClick);
+    this.#eventListComponent.setCreateNewPointHandler(handleNewPointButtonClick);
+  };
+
+  #renderMainInfo = () => {
+    this.#mainInfoComponent = new MainInfoView(this.points, this.allDestinations, this.offers);
+    render(this.#mainInfoComponent, this.#mainInfoContainer, RenderPosition.AFTERBEGIN);
   };
 
   #renderPoints = (points) => {
@@ -172,7 +191,6 @@ export default class AppPresenter {
       this.#infoPoint = {
         point,
         allOffers:this.offers,
-        allTypes:this.allTypes,
         allDestinations:this.allDestinations
       };
 
@@ -191,7 +209,9 @@ export default class AppPresenter {
     this.#pointPresenter.forEach((presenter) => presenter.destroy());
     this.#pointPresenter.clear();
 
+    remove(this.#mainInfoComponent);
     remove(this.#sortComponent);
+    remove(this.#loadingComponent);
 
     if(this.#noPointsComponent) {
       remove(this.#noPointsComponent);

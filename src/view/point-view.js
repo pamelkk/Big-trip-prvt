@@ -5,9 +5,9 @@ const createEventTemplate = (infoPoint) => {
   const {point, allOffers, allDestinations} = infoPoint;
   const { type, dateFrom, dateTo, basePrice } = point;
 
-  const matchedOffers = getMatchedOffersByType(allOffers, point.type);
+  const matchedOffers = getMatchedOffersByType(allOffers, point);
   const selectedOffers = getSelectedOffers(matchedOffers.offers, point.offers);
-  const destination = getDestinationById(allDestinations, point.destination);
+  const destination = getDestinationById(allDestinations, point);
 
   const offersList = selectedOffers.reduce((prev, current) => `
   ${prev}
@@ -34,6 +34,7 @@ const createEventTemplate = (infoPoint) => {
           &mdash;
           <time class='event__end-time' datetime='2019-03-18T11:00'>${timeTo}</time>
         </p>
+        <p class="event__duration">30M</p>
       </div>
       <p class='event__price'>
         &euro;&nbsp;<span class='event__price-value'>${basePrice}</span>

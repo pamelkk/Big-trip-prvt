@@ -1,5 +1,5 @@
 import { getDestinationById, getDestinationByName, getMatchedOffersByType, getRandomElement, getRandomInteger, humanizeEditPoint, humanizeEditPointDateTime } from '../utils';
-import {TYPE_OF_CITY, TYPE_OF_TRANSPORT} from '../mock/const';
+import {TYPE_OF_TRANSPORT} from '../mock/const';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
@@ -15,11 +15,11 @@ const BLANK_POINT = {
 };
 
 const CreateEditPointTemplate = (infoPoint, formType) => {
-  const {point, allOffers, allTypes, allDestinations} = infoPoint;
+  const {point, allOffers, allDestinations} = infoPoint;
   const {type, basePrice, dateFrom, dateTo} = point;
 
-  const matchedOffers = getMatchedOffersByType(allOffers, point.type);
-  const destination = getDestinationById(allDestinations, point.destination);
+  const matchedOffers = getMatchedOffersByType(allOffers, point);
+  const destination = getDestinationById(allDestinations, point);
   const dateStart = dateFrom ? humanizeEditPointDateTime(dateFrom) : '';
   const dateEnd = dateTo ? humanizeEditPointDateTime(dateTo) : '';
 
@@ -28,10 +28,7 @@ const CreateEditPointTemplate = (infoPoint, formType) => {
   <option value=${current.name}></option>`, '');
 
   const destinationPhotos = destination.pictures.reduce((prev, photo) => `
-  ${prev}
-  <div class="event__photos-tape">
-  <img class="event__photo" src=${photo.src} alt="Event photo">
-  </div>`, '');
+  ${prev}<img class="event__photo" src=${photo.src} alt="Event photo">`, '');
 
   const offersList = matchedOffers.offers.reduce((prev, current) => {
     const checked = point.offers.includes(current.id) ? 'checked' : '';
@@ -46,7 +43,7 @@ const CreateEditPointTemplate = (infoPoint, formType) => {
     </label>
   </div>`;}, '');
 
-  const transportList = allTypes.reduce((prev, typeOfTransport) => {
+  const transportList = TYPE_OF_TRANSPORT.reduce((prev, typeOfTransport) => {
     const checked = point.type.includes(typeOfTransport) ? 'checked' : '';
     return `
     ${prev}
@@ -119,7 +116,9 @@ const CreateEditPointTemplate = (infoPoint, formType) => {
         <h3 class="event__section-title  event__section-title--destination">Destination</h3>
         <p class="event__destination-description">${destination.description}</p>
         <div class="event__photos-container">
+        <div class="event__photos-tape">
         ${destinationPhotos}
+        </div>
         </div>
       </section>
     </section>
@@ -135,7 +134,6 @@ export default class EditPointView extends AbstractStatefulView {
     super();
     this.formType = formType;
     this._state = EditPointView.parsePointToState(infoPoint);
-    //console.log(this._state)
     this.#setStartDatepicker();
     this.#setEndDatepicker();
     this.#setInnerHandlers();
@@ -293,6 +291,7 @@ export default class EditPointView extends AbstractStatefulView {
   };
 
   #typeOfDestinationChangeHandler = (evt) => {
+    const TYPE_OF_CITY = this._state.allDestinations.map((city)=> `${city.name}`,'');
     const check = TYPE_OF_CITY.includes(evt.target.value);
     if(!check) {
       const errorButton = this.element.querySelector('.event--error');

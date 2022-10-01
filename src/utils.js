@@ -64,9 +64,9 @@ const sortDate = (pointA, pointB) => {
   }
 };
 
-const getDestinationById = (all, point) => all.find((item) => item.id === point);
+const getDestinationById = (all, point) => all.find((item) => item.id === point.destination);
 const getDestinationByName = (all, value) => all.find((item) => item.name === value);
-const getMatchedOffersByType = (all, point) => all.find((item) => item.type === point);
+const getMatchedOffersByType = (all, point) => all.find((item) => item.type === point.type);
 const getMatchedOffersByName = (all, values) => all.filter((item) => values.find((name) => name === item.title));
 const getSelectedOffers = (all, point) => all.filter((item) => point.find((offerId) => offerId === item.id));
 const getNotSelectedOffers = (all, select) => all.filter((item) => select.every((offer) => offer.title !== item.title));
