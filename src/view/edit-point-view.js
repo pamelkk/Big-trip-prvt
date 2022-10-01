@@ -1,4 +1,4 @@
-import { getDestinationById, getDestinationByName, getMatchedOffersByType, getRandomElement, getRandomInteger, humanizeEditPoint, humanizeEditPointDateTime } from '../utils';
+import { getDestinationById, getDestinationByName, getMatchedOffersByType, getRandomElement, getRandomInteger, humanizeEditPointDateTime } from '../utils';
 import {TYPE_OF_TRANSPORT} from '../mock/const';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import flatpickr from 'flatpickr';
@@ -6,8 +6,8 @@ import 'flatpickr/dist/flatpickr.min.css';
 
 const BLANK_POINT = {
   basePrice: Number(getRandomInteger(100, 2000)),
-  dateFrom: '2019-07-11T22:55:56.845',
-  dateTo: '2019-07-16T11:22:13.375',
+  dateFrom: new Date(2020, 4, 4, 5, 4, 4, 567),
+  dateTo: new Date(2020, 4, 11, 5, 11, 4, 567),
   destination: getRandomInteger(1, 3),
   id: null,
   isFavorite: true,
@@ -15,8 +15,24 @@ const BLANK_POINT = {
   type: getRandomElement(TYPE_OF_TRANSPORT),
 };
 
-const CreateEditPointTemplate = (point, allOffers, allDestinations, formType) => {
+const CreateEditPointTemplate = (point, allOffers, allDestinations, formType, isDisabled, isDeleting, isSaving) => {
   const {type, basePrice, dateFrom, dateTo} = point;
+
+  const disabled = isDisabled ? 'disabled' : '';
+  const saving = isSaving ? 'Saving...' : 'Save';
+  let deleteOrCancel = '';
+
+  if(formType === 'Delete') {
+    if(isDeleting) {
+      deleteOrCancel = 'Deleting...';
+    } else {
+      deleteOrCancel = 'Delete';
+    }
+  }
+
+  if(formType === 'Cancel') {
+    deleteOrCancel = 'Cancel';
+  }
 
   const matchedOffers = getMatchedOffersByType(allOffers, point);
   const destination = getDestinationById(allDestinations, point);
@@ -35,7 +51,7 @@ const CreateEditPointTemplate = (point, allOffers, allDestinations, formType) =>
     return `
     ${prev}
     <div class="event__offer-selector">
-    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${current.id}" type="checkbox" name="event-offer-${type}" ${checked}>
+    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${current.id}" type="checkbox" name="event-offer-${type}" ${checked} ${disabled}>
     <label class="event__offer-label" for="event-offer-${current.id}">
     <span class="event__offer-title">${current.title}</span>
     &plus;&euro;&nbsp;
@@ -48,7 +64,7 @@ const CreateEditPointTemplate = (point, allOffers, allDestinations, formType) =>
     return `
     ${prev}
     <div class="event__type-item">
-    <input id="event-type-${typeOfTransport}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${typeOfTransport}" ${checked}>
+    <input id="event-type-${typeOfTransport}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${typeOfTransport}" ${checked} ${disabled}>
     <label class="event__type-label  event__type-label--${typeOfTransport}" for="event-type-${typeOfTransport}-1">${typeOfTransport}</label>
   </div>`;}, '');
 
@@ -75,7 +91,7 @@ const CreateEditPointTemplate = (point, allOffers, allDestinations, formType) =>
         <label class="event__label  event__type-output" for="event-destination-1">
         ${type}
         </label>
-        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.name}" list="destination-list-1"/>
+        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.name}" ${disabled} list="destination-list-1"/>
         <datalist id="destination-list-1">
           ${destinationList}
         </datalist>
@@ -83,10 +99,10 @@ const CreateEditPointTemplate = (point, allOffers, allDestinations, formType) =>
 
       <div class="event__field-group  event__field-group--time">
         <label class="visually-hidden" for="event-start-time-1">From</label>
-        <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dateStart}"/>
+        <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dateStart}" ${disabled}/>
         &mdash;
         <label class="visually-hidden" for="event-end-time-1">To</label>
-        <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dateEnd}"/>
+        <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dateEnd}" ${disabled}/>
       </div>
 
       <div class="event__field-group  event__field-group--price">
@@ -94,11 +110,11 @@ const CreateEditPointTemplate = (point, allOffers, allDestinations, formType) =>
           <span class="visually-hidden">Price</span>
           &euro;
         </label>
-        <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" min="1" value=${basePrice}>
+        <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" min="1" value=${basePrice} ${disabled}>
       </div>
 
-      <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-      <button class="event__reset-btn" type="reset">${formType}</button>
+      <button class="event__save-btn  btn  btn--blue" type="submit">${saving}</button>
+      <button class="event__reset-btn" type="reset">${deleteOrCancel}</button>
       <button class="event__rollup-btn" type="button">
         <span class="visually-hidden">Open event</span>
       </button>
@@ -230,10 +246,12 @@ export default class EditPointView extends AbstractStatefulView {
   };
 
   #dateFromChangeHandler = ([userDate]) => {
-    this._setState({
-      ...this._state,
-      dateFrom: userDate,
-    });
+    this.updateElement(
+      EditPointView.parseStateToPoint({
+        ...this._state,
+        dateFrom: userDate
+      })
+    );
   };
 
   #priceChangeHandler = (evt) => {
@@ -244,10 +262,12 @@ export default class EditPointView extends AbstractStatefulView {
   };
 
   #dateToChangeHandler = ([userDate]) => {
-    this._setState({
-      ...this._state,
-      dateTo: userDate,
-    });
+    this.updateElement(
+      EditPointView.parseStateToPoint({
+        ...this._state,
+        dateTo: userDate
+      })
+    );
   };
 
   #typeOfTransportChangeHandler = (evt) => {
@@ -315,7 +335,7 @@ export default class EditPointView extends AbstractStatefulView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    const isWrongDates = humanizeEditPoint(this._state.dateFrom) > humanizeEditPoint(this._state.dateTo);
+    const isWrongDates = this._state.dateFrom >= this._state.dateTo;
     if(isWrongDates) {
       const errorButton = this.element.querySelector('.event--error');
       errorButton.textContent = 'The event\'s end date is invalid (can\'t be earlier than event\'s start date)';
@@ -333,10 +353,19 @@ export default class EditPointView extends AbstractStatefulView {
     this._callback.click();
   };
 
-  static parsePointToState = (infoPoint) => ({...infoPoint});
+  static parsePointToState = (infoPoint) => ({...infoPoint,
+    isDisabled: false,
+    isSaving: false,
+    isDeleting: false,
+  });
 
   static parseStateToPoint = (state) => {
     const newState = {...state};
+
+    delete newState.isDisabled;
+    delete newState.isSaving;
+    delete newState.isDeleting;
+
     return newState;
   };
 }

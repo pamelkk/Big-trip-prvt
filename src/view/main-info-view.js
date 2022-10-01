@@ -7,10 +7,17 @@ const mainInfoTemplate = (points, destinations) => {
   const firstDate = firstDateElement ? humanizePointDate(firstDateElement.dateFrom) : '';
   const lastDate = lastDateElement ? humanizePointDate(lastDateElement.dateFrom) : '';
   const getCityofElement = (all, value) => all.find((item) => value === item.id);
-  const getAllCities = (all, values) => all.filter((item) => values.find((value) => value.destination === item.id));
-  const cities = getAllCities(destinations, points);
+  const getMatchedCities = (all, values) => all.filter((item) => values.find((value) => value.destination === item.id));
+  //const getMatchedOffers = (all, values) => all.filter((item) => values.find((value) => value.type === item.type));
+  const matchedCities = getMatchedCities(destinations, points);
+  const citiesForRoute = matchedCities.map((city)=> `${city.name}`,'');
   let dates = '';
   let way = '';
+
+  //const matchedOffers = getMatchedOffers(offers, points);
+  //const onlyoffersnames = matchedOffers.map((offerType)=> offerType.offers);
+  //const getAllOffers = (all, values) => all.filter((item) => values.find((value) => item.offers.includes(value.id)));
+
 
   if(firstDateElement) {
     if (firstDateElement === lastDateElement) {
@@ -32,7 +39,7 @@ const mainInfoTemplate = (points, destinations) => {
       const lastCity = lastCityElement ? lastCityElement.name : '';
       way = `${firstCity}&nbsp;&mdash;&hellip;&mdash;&nbsp;${lastCity}`;
     } else {
-      way = cities.reduce((p,c)=> `${p}&nbsp;&mdash;&nbsp;${c}`,'');
+      way = citiesForRoute.reduce((p,c)=> `${p}&nbsp;&mdash;&nbsp;${c}`,'');
     }
   }
 
