@@ -11,7 +11,6 @@ const mainInfoTemplate = (points, destinations) => {
   const cities = getAllCities(destinations, points);
 
   const firstCityElement = points || !points.length === 0 ? getCityofElement(destinations, points[0]) : '';
-  console.log(firstCityElement)
   const lastCityElement = points || !points.length === 0 ? getCityofElement(destinations, points[points.length - 1]) : '';
   const firstCity = firstCityElement ? firstCityElement.name : '';
   const lastCity = lastCityElement ? lastCityElement.name : '';
