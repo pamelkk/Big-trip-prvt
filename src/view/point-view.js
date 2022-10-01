@@ -1,8 +1,7 @@
 import AbstractView from '../framework/view/abstract-view';
 import { getDestinationById, getMatchedOffersByType, getSelectedOffers, humanizePointDate, humanizePointTime } from '../utils';
 
-const createEventTemplate = (infoPoint) => {
-  const {point, allOffers, allDestinations} = infoPoint;
+const createEventTemplate = (point, allOffers, allDestinations) => {
   const { type, dateFrom, dateTo, basePrice } = point;
 
   const matchedOffers = getMatchedOffersByType(allOffers, point);
@@ -52,14 +51,18 @@ const createEventTemplate = (infoPoint) => {
 
 export default class PointView extends AbstractView {
   #infoPoint = [];
+  #offers = [];
+  #destinations = [];
 
-  constructor(infoPoint) {
+  constructor(infoPoint, offers, destinations) {
     super();
     this.#infoPoint = infoPoint;
+    this.#offers = offers;
+    this.#destinations = destinations;
   }
 
   get template() {
-    return createEventTemplate(this.#infoPoint);
+    return createEventTemplate(this.#infoPoint, this.#offers, this.#destinations);
   }
 
   setEditClickHandler = (callback) => {

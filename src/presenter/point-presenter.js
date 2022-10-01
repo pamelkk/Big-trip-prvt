@@ -17,6 +17,8 @@ export default class PointPresenter {
   #changeMode = null;
   #mode = Mode.DEFAULT;
   #changeData = null;
+  #offers = [];
+  #destinations = [];
 
   constructor (eventListComponent, changeData, changeMode) {
     this.#eventListComponent = eventListComponent;
@@ -24,19 +26,21 @@ export default class PointPresenter {
     this.#changeMode = changeMode;
   }
 
-  init = (info) => {
+  init = (info, offers, destinations) => {
     const prevPointComponent = this.#pointComponent;
     const prevEditPointComponent = this.#editPointComponent;
+    this.#offers = offers;
+    this.#destinations = destinations;
 
     this.#info = info;
-    this.#pointComponent = new PointView(this.#info);
-    this.#editPointComponent = new EditPointView(this.#info, formViewTypeButton.EDIT_FORM);
+    this.#pointComponent = new PointView(this.#info, this.#offers, this.#destinations);
+    this.#editPointComponent = new EditPointView(this.#info, this.#offers, this.#destinations, formViewTypeButton.EDIT_FORM);
     this.#pointComponent.setEditClickHandler(this.#handleEditClick);
     this.#editPointComponent.setSubmitFormHandler(this.#handleFormSubmit);
     this.#editPointComponent.setResetFormHandler(this.#handleFormReset);
     this.#editPointComponent.setFormClickHandler(this.#handleFormClick);
 
-    if (prevPointComponent === null || prevEditPointComponent === null) {
+    if (!prevPointComponent || !prevEditPointComponent) {
       render(this.#pointComponent, this.#eventListComponent);
       return;
     }
@@ -91,7 +95,7 @@ export default class PointPresenter {
   };
 
   #handleFormSubmit = (update) => {
-    const isMinorUpdate = this.#info.point.type !== update.point.type || this.#info.point.offers !== update.point.offers || this.#info.point.destination !== update.point.destination;
+    const isMinorUpdate = this.#info.type !== update.type || this.#info.offers !== update.offers || this.#info.destination !== update.destination;
     this.#changeData(UserAction.UPDATE_POINT, isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH, update);
     this.#replaceEditPointToPoint();
   };

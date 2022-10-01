@@ -19,8 +19,6 @@ export default class AppPresenter {
   #noPointsComponent = null;
   #mainInfoComponent = null;
   #sortComponent = null;
-  #infoPoint = [];
-  #infoRandomPoint = [];
   #pointPresenter = new Map();
   #newPointPresenter = null;
   #currentSortType = SortType.DEFAULT;
@@ -53,10 +51,6 @@ export default class AppPresenter {
     return filteredPoints;
   }
 
-  get blankPoint () {
-    return this.#pointModel.blankPoint;
-  }
-
   get currentFilter () {
     return this.#filterModel.currentFilter;
   }
@@ -65,7 +59,7 @@ export default class AppPresenter {
     return this.#pointModel.offers;
   }
 
-  get allDestinations () {
+  get destinations () {
     return this.#pointModel.destinations;
   }
 
@@ -90,23 +84,30 @@ export default class AppPresenter {
   #handleModelEvent = (updateType, data) => {
     switch (updateType) {
       case UpdateType.PATCH:
-        this.#pointPresenter.get(data.point.id).init(data);
+        this.#pointPresenter.get(data.id).init(data);
         if(this.currentFilter !== 'everything') {
           this.#clearPointsList();
           this.#renderListClass();
         }
+        remove(this.#mainInfoComponent);
+        this.#renderMainInfo();
         break;
       case UpdateType.MINOR:
         this.#clearPointsList();
         this.#renderListClass();
+        remove(this.#mainInfoComponent);
+        this.#renderMainInfo();
         break;
       case UpdateType.MAJOR:
         this.#clearPointsList({resetSortType: true});
         this.#renderListClass();
+        remove(this.#mainInfoComponent);
+        this.#renderMainInfo();
         break;
       case UpdateType.INIT:
         this.#isLoading = false;
         remove(this.#loadingComponent);
+        this.#renderMainInfo();
         this.#renderListClass();
         break;
     }
@@ -126,10 +127,12 @@ export default class AppPresenter {
     this.#pointPresenter.forEach((presenter) => presenter.resetView());
   };
 
-  #renderPoint = (info) => {
+  #renderPoint = (info, offers, destinations) => {
     const pointPresenter = new PointPresenter(this.#eventListComponent.element, this.#handleViewAction, this.#handleModeChange);
-    pointPresenter.init(info);
-    this.#pointPresenter.set(info.point.id, pointPresenter);
+    offers = this.offers;
+    destinations = this.destinations;
+    pointPresenter.init(info, offers, destinations);
+    this.#pointPresenter.set(info.id, pointPresenter);
   };
 
   #renderLoading = () => {
@@ -141,10 +144,12 @@ export default class AppPresenter {
     render(this.#noPointsComponent, this.#eventListComponent.element);
   };
 
-  #createPoint = (callback, info) => {
+  #createPoint = (callback, offers, destinations) => {
     this.#currentSortType = SortType.DEFAULT;
     this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
-    this.#newPointPresenter.init(callback, info);
+    offers = this.offers;
+    destinations = this.destinations;
+    this.#newPointPresenter.init(callback, offers, destinations);
   };
 
   #renderListClass = () => {
@@ -154,19 +159,12 @@ export default class AppPresenter {
       return;
     }
     const addNewPointButton = document.querySelector('.trip-main__event-add-btn');
-    this.#renderMainInfo();
     this.#renderSort();
-    this.#renderPoints(this.points);
+    this.#renderPoints(this.points, this.offers, this.destinations);
 
-    if(!this.offers || !this.allDestinations) {
+    if(!this.offers || !this.destinations) {
       addNewPointButton.disabled = true;
     }
-
-    this.#infoRandomPoint = {
-      point:this.blankPoint,
-      allOffers:this.offers,
-      allDestinations:this.allDestinations
-    };
 
     if(this.points.length === 0) {
       this.#renderNoPoints();
@@ -178,7 +176,7 @@ export default class AppPresenter {
     };
 
     const handleNewPointButtonClick = () => {
-      this.#createPoint(handleNewPointFormClose, this.#infoRandomPoint);
+      this.#createPoint(handleNewPointFormClose);
       addNewPointButton.disabled = true;
     };
 
@@ -186,19 +184,13 @@ export default class AppPresenter {
   };
 
   #renderMainInfo = () => {
-    this.#mainInfoComponent = new MainInfoView(this.points, this.allDestinations, this.offers);
+    this.#mainInfoComponent = new MainInfoView(this.#pointModel.points, this.destinations, this.offers);
     render(this.#mainInfoComponent, this.#mainInfoContainer, RenderPosition.AFTERBEGIN);
   };
 
-  #renderPoints = (points) => {
+  #renderPoints = (points, offers, destinations) => {
     for(const point of points) {
-      this.#infoPoint = {
-        point,
-        allOffers:this.offers,
-        allDestinations:this.allDestinations
-      };
-
-      this.#renderPoint(this.#infoPoint);
+      this.#renderPoint(point, offers, destinations);
     }
   };
 
@@ -213,7 +205,6 @@ export default class AppPresenter {
     this.#pointPresenter.forEach((presenter) => presenter.destroy());
     this.#pointPresenter.clear();
 
-    remove(this.#mainInfoComponent);
     remove(this.#sortComponent);
     remove(this.#loadingComponent);
 

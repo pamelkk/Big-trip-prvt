@@ -9,21 +9,24 @@ export default class NewPointPresenter {
   #eventListContainer = null;
   #destroyCallback = null;
   #info = null;
+  #offers = [];
+  #destinations = [];
 
   constructor (eventListContainer, changeData) {
     this.#eventListContainer = eventListContainer;
     this.#changeData = changeData;
   }
 
-  init = (callback, info) => {
+  init = (callback, offers, destinations) => {
     this.#destroyCallback = callback;
-    this.#info = info;
+    this.#offers = offers;
+    this.#destinations = destinations;
 
     if (this.#addPointComponent !== null) {
       return;
     }
 
-    this.#addPointComponent = new EditPointView(this.#info, formViewTypeButton.ADD_FORM);
+    this.#addPointComponent = new EditPointView(this.#info, this.#offers, this.#destinations, formViewTypeButton.ADD_FORM);
     this.#addPointComponent.setSubmitFormHandler(this.#handleFormSubmit);
     this.#addPointComponent.setResetFormHandler(this.#handleFormReset);
 
@@ -34,7 +37,7 @@ export default class NewPointPresenter {
   };
 
   destroy = () => {
-    if (this.#addPointComponent === null) {
+    if (!this.#addPointComponent) {
       return;
     }
 
