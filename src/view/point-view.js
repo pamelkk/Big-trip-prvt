@@ -1,13 +1,12 @@
 import AbstractView from '../framework/view/abstract-view';
 import { getDestinationById, getMatchedOffersByType, getSelectedOffers, humanizePointDate, humanizePointTime } from '../utils';
 
-const createEventTemplate = (infoPoint) => {
-  const {point, allOffers, allDestinations} = infoPoint;
+const createEventTemplate = (point, allOffers, allDestinations) => {
   const { type, dateFrom, dateTo, basePrice } = point;
 
-  const matchedOffers = getMatchedOffersByType(allOffers, point.type);
+  const matchedOffers = getMatchedOffersByType(allOffers, point);
   const selectedOffers = getSelectedOffers(matchedOffers.offers, point.offers);
-  const destination = getDestinationById(allDestinations, point.destination);
+  const destination = getDestinationById(allDestinations, point);
 
   const offersList = selectedOffers.reduce((prev, current) => `
   ${prev}
@@ -34,6 +33,7 @@ const createEventTemplate = (infoPoint) => {
           &mdash;
           <time class='event__end-time' datetime='2019-03-18T11:00'>${timeTo}</time>
         </p>
+        <p class="event__duration">30M</p>
       </div>
       <p class='event__price'>
         &euro;&nbsp;<span class='event__price-value'>${basePrice}</span>
@@ -51,14 +51,18 @@ const createEventTemplate = (infoPoint) => {
 
 export default class PointView extends AbstractView {
   #infoPoint = [];
+  #offers = [];
+  #destinations = [];
 
-  constructor(infoPoint) {
+  constructor(infoPoint, offers, destinations) {
     super();
     this.#infoPoint = infoPoint;
+    this.#offers = offers;
+    this.#destinations = destinations;
   }
 
   get template() {
-    return createEventTemplate(this.#infoPoint);
+    return createEventTemplate(this.#infoPoint, this.#offers, this.#destinations);
   }
 
   setEditClickHandler = (callback) => {
