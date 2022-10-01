@@ -10,8 +10,9 @@ const mainInfoTemplate = (points, destinations) => {
   const getAllCities = (all, values) => all.filter((item) => values.find((value) => value.destination === item.id));
   const cities = getAllCities(destinations, points);
 
-  const firstCityElement = points || !points.length === 0 ? getCityofElement(destinations, points[0]) : '';
-  const lastCityElement = points || !points.length === 0 ? getCityofElement(destinations, points[points.length - 1]) : '';
+  console.log(points)
+  const firstCityElement = points || !points.length === 0 ? getCityofElement(destinations, points[0].destination) : '';
+  const lastCityElement = points || !points.length === 0 ? getCityofElement(destinations, points[points.length - 1].destination) : '';
   const firstCity = firstCityElement ? firstCityElement.name : '';
   const lastCity = lastCityElement ? lastCityElement.name : '';
   let dates = '';
