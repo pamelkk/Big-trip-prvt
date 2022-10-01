@@ -1,7 +1,7 @@
 import AbstractView from '../framework/view/abstract-view';
 import { humanizePointDate } from '../utils';
 
-const mainInfoTemplate = (points, destinations, offers) => {
+const mainInfoTemplate = (points, destinations) => {
   const firstDateElement = points || !points.length ? points[0] : '';
   const lastDateElement = points || !points.length ? points[points.length - 1] : '';
   const firstDate = firstDateElement ? humanizePointDate(firstDateElement.dateFrom) : '';
