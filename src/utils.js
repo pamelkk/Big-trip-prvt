@@ -45,9 +45,9 @@ const sortPrice = (pointA, pointB) => {
 };
 
 const sortTime = (pointA, pointB) => {
-  if (dayjs(pointB.dateFrom).diff(dayjs(pointB.dateTo)) > dayjs(pointA.dateFrom).diff(dayjs(pointA.dateTo))) {
+  if (dayjs(pointA.dateFrom).diff(dayjs(pointA.dateTo)) > dayjs(pointB.dateFrom).diff(dayjs(pointB.dateTo))) {
     return 1;
-  } else if (dayjs(pointA.dateFrom).diff(dayjs(pointA.dateTo)) > dayjs(pointB.dateFrom).diff(dayjs(pointB.dateTo))) {
+  } else if (dayjs(pointB.dateFrom).diff(dayjs(pointB.dateTo)) > dayjs(pointA.dateFrom).diff(dayjs(pointA.dateTo))) {
     return -1;
   } else {
     return 0;
@@ -74,9 +74,9 @@ const getNotSelectedTypes = (all, point) => all.filter((item) => item !== point)
 
 const getArray = (elements) => [...new Set(elements)].slice(0, getRandomInteger(0, 2));
 
-const isPointSameOrAfterToday = (point) => humanizeEditPoint(point.dateFrom) >= humanizeEditPoint(dayjs(new Date()));
-const isPointLongerToday = (point) => humanizeEditPoint(point.dateTo) > humanizeEditPoint(dayjs(new Date()));
-const isPointEndEarlierToday = (point) => humanizeEditPoint(dayjs(new Date())) > humanizeEditPoint(point.dateTo);
+const isPointSameOrAfterToday = (point) => point.dateFrom >= dayjs(new Date());
+const isPointLongerToday = (point) => point.dateTo > dayjs(new Date());
+const isPointEndEarlierToday = (point) => dayjs(new Date()) > point.dateTo;
 
 const filter = {
   [FilterType.EVERYTHING]: (points) => points,

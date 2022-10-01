@@ -49,6 +49,13 @@ export default class NewPointPresenter {
     document.removeEventListener('keydown', this.#onEscKeyDownResetNewPointForm);
   };
 
+  setSaving = () => {
+    this.#addPointComponent.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });
+  };
+
   #handleFormReset = () => {
     this.destroy();
     document.querySelector('.trip-main__event-add-btn').disabled = false;
@@ -56,7 +63,6 @@ export default class NewPointPresenter {
 
   #handleFormSubmit = (point) => {
     this.#changeData(UserAction.ADD_POINT, UpdateType.MINOR, point);
-    this.destroy();
 
     document.querySelector('.trip-main__event-add-btn').disabled = false;
   };
