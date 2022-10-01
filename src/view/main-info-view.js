@@ -6,11 +6,12 @@ const mainInfoTemplate = (points, destinations) => {
   const lastDateElement = points || !points.length === 0 ? points[points.length - 1] : '';
   const firstDate = firstDateElement ? humanizePointDate(firstDateElement.dateFrom) : '';
   const lastDate = lastDateElement ? humanizePointDate(lastDateElement.dateFrom) : '';
-  const getCityofElement = (all, value) => all.find((item) => value.destination === item.id);
+  const getCityofElement = (all, value) => all.find((item) => value === item.id);
   const getAllCities = (all, values) => all.filter((item) => values.find((value) => value.destination === item.id));
   const cities = getAllCities(destinations, points);
 
   const firstCityElement = points || !points.length === 0 ? getCityofElement(destinations, points[0]) : '';
+  console.log(firstCityElement)
   const lastCityElement = points || !points.length === 0 ? getCityofElement(destinations, points[points.length - 1]) : '';
   const firstCity = firstCityElement ? firstCityElement.name : '';
   const lastCity = lastCityElement ? lastCityElement.name : '';

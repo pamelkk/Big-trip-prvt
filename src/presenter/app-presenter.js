@@ -158,6 +158,10 @@ export default class AppPresenter {
     this.#renderSort();
     this.#renderPoints(this.points);
 
+    if(!this.offers || !this.allDestinations) {
+      addNewPointButton.disabled = true;
+    }
+
     this.#infoRandomPoint = {
       point:this.blankPoint,
       allOffers:this.offers,
