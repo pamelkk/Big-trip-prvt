@@ -1,22 +1,22 @@
 import AbstractView from '../framework/view/abstract-view';
 import { humanizePointDate } from '../utils';
 
-const mainInfoTemplate = (points, destinations, offers) => {
+const mainInfoTemplate = (points, destinations) => {
   const firstDateElement = points || !points.length ? points[0] : '';
   const lastDateElement = points || !points.length ? points[points.length - 1] : '';
   const firstDate = firstDateElement ? humanizePointDate(firstDateElement.dateFrom) : '';
   const lastDate = lastDateElement ? humanizePointDate(lastDateElement.dateFrom) : '';
   const getCityofElement = (all, value) => all.find((item) => value === item.id);
   const getMatchedCities = (all, values) => all.filter((item) => values.find((value) => value.destination === item.id));
-  const getMatchedOffers = (all, values) => all.filter((item) => values.find((value) => value.type === item.type));
+  //const getMatchedOffers = (all, values) => all.filter((item) => values.find((value) => value.type === item.type));
   const matchedCities = getMatchedCities(destinations, points);
   const citiesForRoute = matchedCities.map((city)=> `${city.name}`,'');
   let dates = '';
   let way = '';
 
-  const matchedOffers = getMatchedOffers(offers, points);
-  const onlyoffersnames = matchedOffers.map((offerType)=> offerType.offers);
-  const getAllOffers = (all, values) => all.filter((item) => values.find((value) => item.offers.includes(value.id)));
+  //const matchedOffers = getMatchedOffers(offers, points);
+  //const onlyoffersnames = matchedOffers.map((offerType)=> offerType.offers);
+  //const getAllOffers = (all, values) => all.filter((item) => values.find((value) => item.offers.includes(value.id)));
 
 
   if(firstDateElement) {
