@@ -11,16 +11,18 @@ export default class NewPointPresenter {
   #info = null;
   #offers = [];
   #destinations = [];
+  #addNewButtonElement = null;
 
   constructor (eventListContainer, changeData) {
     this.#eventListContainer = eventListContainer;
     this.#changeData = changeData;
   }
 
-  init = (callback, offers, destinations) => {
+  init = (callback, offers, destinations, addNewButtonElement) => {
     this.#destroyCallback = callback;
     this.#offers = offers;
     this.#destinations = destinations;
+    this.#addNewButtonElement = addNewButtonElement;
 
     if (this.#addPointComponent !== null) {
       return;
@@ -32,7 +34,7 @@ export default class NewPointPresenter {
 
     render(this.#addPointComponent, this.#eventListContainer, RenderPosition.AFTERBEGIN);
 
-    document.querySelector('.trip-main__event-add-btn').disabled = true;
+    this.#addNewButtonElement.element.disabled = true;
     document.addEventListener('keydown', this.#onEscKeyDownResetNewPointForm);
   };
 
@@ -58,20 +60,20 @@ export default class NewPointPresenter {
 
   #handleFormReset = () => {
     this.destroy();
-    document.querySelector('.trip-main__event-add-btn').disabled = false;
+    this.#addNewButtonElement.element.disabled = false;
   };
 
   #handleFormSubmit = (point) => {
     this.#changeData(UserAction.ADD_POINT, UpdateType.MINOR, point);
 
-    document.querySelector('.trip-main__event-add-btn').disabled = false;
+    this.#addNewButtonElement.element.disabled = false;
   };
 
   #onEscKeyDownResetNewPointForm = (evt) => {
     if (isEscPressed(evt)) {
       evt.preventDefault();
       this.destroy();
-      document.querySelector('.trip-main__event-add-btn').disabled = false;
+      this.#addNewButtonElement.element.disabled = false;
     }
   };
 }

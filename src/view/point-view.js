@@ -100,6 +100,14 @@ export default class PointView extends AbstractStatefulView {
     return createEventTemplate(this._state, this.#offers, this.#destinations);
   }
 
+  setEditClickHandler = (callback) => {
+    this._callback.click = callback;
+  };
+
+  _restoreHandlers = () => {
+    this.#setInnerHandlers();
+  };
+
   #setInnerHandlers = () => {
     this.element.querySelector('.event__favorite-btn').addEventListener('click', this.#addRemoveFavoriteChangeHandler);
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
@@ -122,17 +130,9 @@ export default class PointView extends AbstractStatefulView {
     );
   };
 
-  setEditClickHandler = (callback) => {
-    this._callback.click = callback;
-  };
-
   #clickHandler = (evt) => {
     evt.preventDefault();
     this._callback.click();
-  };
-
-  _restoreHandlers = () => {
-    this.#setInnerHandlers();
   };
 
   static parsePointToState = (infoPoint) => ({...infoPoint});
