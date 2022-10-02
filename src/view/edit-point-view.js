@@ -1,5 +1,5 @@
 import { getDestinationById, getDestinationByName, getMatchedOffersByType, getRandomElement, getRandomInteger, humanizeEditPointDateTime } from '../utils';
-import {TYPE_OF_TRANSPORT} from '../mock/const';
+import { TYPE_OF_TRANSPORT } from '../mock/const';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
@@ -10,13 +10,13 @@ const BLANK_POINT = {
   dateTo: new Date(2020, 4, 11, 5, 11, 4, 567),
   destination: getRandomInteger(1, 3),
   id: null,
-  isFavorite: true,
+  isFavorite: false,
   offers: [1],
   type: getRandomElement(TYPE_OF_TRANSPORT),
 };
 
-const CreateEditPointTemplate = (point, allOffers, allDestinations, formType, isDisabled, isDeleting, isSaving) => {
-  const {type, basePrice, dateFrom, dateTo} = point;
+const createEditPointTemplate = (point, allOffers, allDestinations, formType) => {
+  const {type, basePrice, dateFrom, dateTo, isDisabled, isSaving, isDeleting} = point;
 
   const disabled = isDisabled ? 'disabled' : '';
   const saving = isSaving ? 'Saving...' : 'Save';
@@ -28,9 +28,7 @@ const CreateEditPointTemplate = (point, allOffers, allDestinations, formType, is
     } else {
       deleteOrCancel = 'Delete';
     }
-  }
-
-  if(formType === 'Cancel') {
+  } else if (formType === 'Cancel') {
     deleteOrCancel = 'Cancel';
   }
 
@@ -164,8 +162,29 @@ export default class EditPointView extends AbstractStatefulView {
   }
 
   get template() {
-    return CreateEditPointTemplate(this._state, this.#offers, this.#destinations, this.#formType);
+    return createEditPointTemplate(this._state, this.#offers, this.#destinations, this.#formType);
   }
+
+  setSubmitFormHandler = (callback) => {
+    this._callback.formSubmit = callback;
+  };
+
+  setFormClickHandler = (callback) => {
+    this._callback.click = callback;
+  };
+
+  setResetFormHandler = (callback) => {
+    this._callback.formReset = callback;
+  };
+
+  _restoreHandlers = () => {
+    this.#setInnerHandlers();
+    this.setSubmitFormHandler(this._callback.formSubmit);
+    this.setFormClickHandler(this._callback.click);
+    this.setResetFormHandler(this._callback.formReset);
+    this.#setStartDatepicker();
+    this.#setEndDatepicker();
+  };
 
   removeElement = () => {
     super.removeElement();
@@ -185,27 +204,6 @@ export default class EditPointView extends AbstractStatefulView {
     this.updateElement(
       EditPointView.parsePointToState(infoPoint),
     );
-  };
-
-  _restoreHandlers = () => {
-    this.#setInnerHandlers();
-    this.setSubmitFormHandler(this._callback.formSubmit);
-    this.setFormClickHandler(this._callback.click);
-    this.setResetFormHandler(this._callback.formReset);
-    this.#setStartDatepicker();
-    this.#setEndDatepicker();
-  };
-
-  setSubmitFormHandler = (callback) => {
-    this._callback.formSubmit = callback;
-  };
-
-  setFormClickHandler = (callback) => {
-    this._callback.click = callback;
-  };
-
-  setResetFormHandler = (callback) => {
-    this._callback.formReset = callback;
   };
 
   #setInnerHandlers = () => {
@@ -312,12 +310,12 @@ export default class EditPointView extends AbstractStatefulView {
     const TYPE_OF_CITY = this.#destinations.map((city)=> `${city.name}`,'');
     const check = TYPE_OF_CITY.includes(evt.target.value);
     if(!check) {
-      const errorButton = this.element.querySelector('.event--error');
-      errorButton.textContent = 'Pls select a city from the list';
-      errorButton.style.color = 'red';
-      errorButton.style.padding = '15px';
-      errorButton.style.margin = '0';
-      errorButton.style.fontWeight = 'bold';
+      const errorButtonElement = this.element.querySelector('.event--error');
+      errorButtonElement.textContent = 'Pls select a city from the list';
+      errorButtonElement.style.color = 'red';
+      errorButtonElement.style.padding = '15px';
+      errorButtonElement.style.margin = '0';
+      errorButtonElement.style.fontWeight = 'bold';
       return;
     }
     this.updateElement(
@@ -337,12 +335,12 @@ export default class EditPointView extends AbstractStatefulView {
     evt.preventDefault();
     const isWrongDates = this._state.dateFrom >= this._state.dateTo;
     if(isWrongDates) {
-      const errorButton = this.element.querySelector('.event--error');
-      errorButton.textContent = 'The event\'s end date is invalid (can\'t be earlier than event\'s start date)';
-      errorButton.style.color = 'red';
-      errorButton.style.padding = '15px';
-      errorButton.style.margin = '0';
-      errorButton.style.fontWeight = 'bold';
+      const errorButtonElement = this.element.querySelector('.event--error');
+      errorButtonElement.textContent = 'The event\'s end date is invalid (can\'t be earlier than event\'s start date)';
+      errorButtonElement.style.color = 'red';
+      errorButtonElement.style.padding = '15px';
+      errorButtonElement.style.margin = '0';
+      errorButtonElement.style.fontWeight = 'bold';
       return;
     }
     this._callback.formSubmit(EditPointView.parseStateToPoint(this._state));

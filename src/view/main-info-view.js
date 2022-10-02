@@ -1,23 +1,22 @@
 import AbstractView from '../framework/view/abstract-view';
 import { humanizePointDate } from '../utils';
 
-const mainInfoTemplate = (points, destinations) => {
+const createMainInfoTemplate = (points, destinations) => {
   const firstDateElement = points || !points.length ? points[0] : '';
   const lastDateElement = points || !points.length ? points[points.length - 1] : '';
   const firstDate = firstDateElement ? humanizePointDate(firstDateElement.dateFrom) : '';
   const lastDate = lastDateElement ? humanizePointDate(lastDateElement.dateFrom) : '';
   const getCityofElement = (all, value) => all.find((item) => value === item.id);
   const getMatchedCities = (all, values) => all.filter((item) => values.find((value) => value.destination === item.id));
-  //const getMatchedOffers = (all, values) => all.filter((item) => values.find((value) => value.type === item.type));
   const matchedCities = getMatchedCities(destinations, points);
-  const citiesForRoute = matchedCities.map((city)=> `${city.name}`,'');
+  const citiesForRoute = matchedCities.map((city)=> `${city.name}`);
   let dates = '';
   let way = '';
 
+  //const getMatchedOffers = (all, values) => all.filter((item) => values.find((value) => value.type === item.type));
   //const matchedOffers = getMatchedOffers(offers, points);
-  //const onlyoffersnames = matchedOffers.map((offerType)=> offerType.offers);
-  //const getAllOffers = (all, values) => all.filter((item) => values.find((value) => item.offers.includes(value.id)));
-
+  //const getAllOffers = (all, values) => all.filter((item) => values.filter((value) => item.offers.filter((itemOffer) => itemOffer.id === value.id)));
+  //console.log(getAllOffers(matchedOffers, points))
 
   if(firstDateElement) {
     if (firstDateElement === lastDateElement) {
@@ -39,7 +38,7 @@ const mainInfoTemplate = (points, destinations) => {
       const lastCity = lastCityElement ? lastCityElement.name : '';
       way = `${firstCity}&nbsp;&mdash;&hellip;&mdash;&nbsp;${lastCity}`;
     } else {
-      way = citiesForRoute.reduce((p,c)=> `${p}&nbsp;&mdash;&nbsp;${c}`,'');
+      way = citiesForRoute.join('&nbsp;&mdash;&nbsp;');
     }
   }
 
@@ -71,6 +70,6 @@ export default class MainInfoView extends AbstractView {
   }
 
   get template() {
-    return mainInfoTemplate(this.#points, this.#destinations, this.#offers);
+    return createMainInfoTemplate(this.#points, this.#destinations, this.#offers);
   }
 }

@@ -36,6 +36,12 @@ export default class FilterPresenter {
     remove(prevFilterComponent);
   };
 
+  setDisabling = (filter) => {
+    const makeDisableElement = this.#filterComponent.element.querySelector(`.trip-filters__filter-input[value="${filter}"]`);
+
+    makeDisableElement.disabled = true;
+  };
+
   #handleModelEvent = () => {
     this.init();
   };

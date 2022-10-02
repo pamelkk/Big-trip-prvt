@@ -9,6 +9,7 @@ import { FilterType, SortType, UpdateType, UserAction } from '../mock/const';
 import NewPointPresenter from './new-point-presenter';
 import MainInfoView from '../view/main-info-view';
 import LoadingView from '../view/loading-view';
+import FilterPresenter from './filter-presenter';
 
 const TimeLimit = {
   LOWER_LIMIT: 350,
@@ -24,16 +25,20 @@ export default class AppPresenter {
   #loadingComponent = new LoadingView();
   #noPointsComponent = null;
   #mainInfoComponent = null;
+  #tripFiltersElement = null;
   #sortComponent = null;
   #pointPresenter = new Map();
   #newPointPresenter = null;
+  #filterPresenter = null;
   #currentSortType = SortType.DEFAULT;
   #isLoading = true;
   #uiBlocker = new UiBlocker(TimeLimit.LOWER_LIMIT, TimeLimit.UPPER_LIMIT);
 
-  constructor(appContainer, pointModel, filterModel, mainInfoContainer) {
+  constructor(appContainer, pointModel, filterModel, mainInfoContainer, tripFiltersElement, addNewButtonElement) {
     this.#appContainer = appContainer;
     this.#mainInfoContainer = mainInfoContainer;
+    this.#tripFiltersElement = tripFiltersElement;
+    this.addNewButtonElement = addNewButtonElement;
     this.#pointModel = pointModel;
     this.#filterModel = filterModel;
 
@@ -41,11 +46,22 @@ export default class AppPresenter {
     this.#filterModel.addObserver(this.#handleModelEvent);
 
     this.#newPointPresenter = new NewPointPresenter(this.#eventListComponent.element, this.#handleViewAction);
+    this.#filterPresenter = new FilterPresenter(this.#tripFiltersElement, this.#pointModel, this.#filterModel);
   }
 
   get points() {
     const points = this.#pointModel.points;
     const filteredPoints = filter[this.currentFilter](points);
+
+    const filteredFuturePoints = filter[FilterType.FUTURE](points);
+    const filteredPastPoints = filter[FilterType.PAST](points);
+
+    if(!filteredFuturePoints.length) {
+      this.#filterPresenter.setDisabling(FilterType.FUTURE);
+    }
+    if(!filteredPastPoints.length) {
+      this.#filterPresenter.setDisabling(FilterType.PAST);
+    }
 
     switch (this.#currentSortType) {
       case SortType.PRICE:
@@ -71,6 +87,7 @@ export default class AppPresenter {
   }
 
   init = () => {
+    this.#filterPresenter.init();
     this.#renderListClass();
   };
 
@@ -91,7 +108,7 @@ export default class AppPresenter {
         try {
           await this.#pointModel.deletePoint(updateType, update);
         } catch(err) {
-          this.#pointPresenter.setAborting();
+          this.#pointPresenter.get(update.id).setAborting();
         }
         break;
       case UserAction.ADD_POINT:
@@ -169,12 +186,13 @@ export default class AppPresenter {
     render(this.#noPointsComponent, this.#eventListComponent.element);
   };
 
-  #createPoint = (callback, offers, destinations) => {
+  #createPoint = (callback, offers, destinations, addNewButtonElement) => {
     this.#currentSortType = SortType.DEFAULT;
     this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
     offers = this.offers;
+    addNewButtonElement = this.addNewButtonElement;
     destinations = this.destinations;
-    this.#newPointPresenter.init(callback, offers, destinations);
+    this.#newPointPresenter.init(callback, offers, destinations, addNewButtonElement);
   };
 
   #renderListClass = () => {
@@ -183,12 +201,11 @@ export default class AppPresenter {
       this.#renderLoading();
       return;
     }
-    const addNewPointButton = document.querySelector('.trip-main__event-add-btn');
     this.#renderSort();
     this.#renderPoints(this.points, this.offers, this.destinations);
 
     if(!this.offers || !this.destinations) {
-      addNewPointButton.disabled = true;
+      this.addNewButtonElement.element.disabled = true;
     }
 
     if(this.points.length === 0) {
@@ -197,15 +214,15 @@ export default class AppPresenter {
     }
 
     const handleNewPointFormClose = () => {
-      addNewPointButton.disabled = false;
+      this.addNewButtonElement.element.disabled = false;
     };
 
     const handleNewPointButtonClick = () => {
       this.#createPoint(handleNewPointFormClose);
-      addNewPointButton.disabled = true;
+      this.addNewButtonElement.element.disabled = true;
     };
 
-    this.#eventListComponent.setCreateNewPointHandler(handleNewPointButtonClick);
+    this.addNewButtonElement.setCreateNewPointHandler(handleNewPointButtonClick);
   };
 
   #renderMainInfo = () => {

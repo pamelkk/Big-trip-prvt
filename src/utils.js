@@ -74,14 +74,14 @@ const getNotSelectedTypes = (all, point) => all.filter((item) => item !== point)
 
 const getArray = (elements) => [...new Set(elements)].slice(0, getRandomInteger(0, 2));
 
-const isPointSameOrAfterToday = (point) => point.dateFrom >= dayjs(new Date());
-const isPointLongerToday = (point) => point.dateTo > dayjs(new Date());
-const isPointEndEarlierToday = (point) => dayjs(new Date()) > point.dateTo;
+const getPointSameOrAfterToday = (point) => point.dateFrom >= dayjs(new Date());
+const getPointLongerToday = (point) => point.dateTo > dayjs(new Date());
+const getPointEndEarlierToday = (point) => dayjs(new Date()) > point.dateTo;
 
 const filter = {
   [FilterType.EVERYTHING]: (points) => points,
-  [FilterType.FUTURE]: (points) => points.filter((point) => isPointSameOrAfterToday(point) || isPointLongerToday(point)),
-  [FilterType.PAST]: (points) => points.filter((point) => isPointEndEarlierToday(point)),
+  [FilterType.FUTURE]: (points) => points.filter((point) => getPointSameOrAfterToday(point) || getPointLongerToday(point)),
+  [FilterType.PAST]: (points) => points.filter((point) => getPointEndEarlierToday(point)),
 };
 
 export {isEscPressed, getRandomElement, filter, humanizeEditPoint, humanizeEditPointDateTime, humanizePointDate, humanizePointTime, getRandomInteger, getArray, updatePoint, getDestinationById, getDestinationByName, getMatchedOffersByType, getMatchedOffersByName, getSelectedOffers, getNotSelectedOffers, sortPrice, sortDate, sortTime, getNotSelectedTypes};
