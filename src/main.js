@@ -21,7 +21,12 @@ const pointModel = new PointModel(new PointsApiService(END_POINT, AUTHORIZATION)
 const filterModel = new FilterModel();
 const appPresenter = new AppPresenter(tripEventsElement, pointModel, filterModel, tripMainInfoElement, tripFiltersElement, addNewButtonElement);
 
-appPresenter.init();
-pointModel.init().finally(() => {
+const initPointsModel = async () => {
+  if(await pointModel.init() instanceof Error) {
+    return;
+  }
   render(addNewButtonElement, tripMainInfoElement);
-});
+};
+
+appPresenter.init();
+initPointsModel();

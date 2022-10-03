@@ -11,7 +11,8 @@ const SortType = {
 const FilterType = {
   EVERYTHING: 'everything',
   FUTURE: 'future',
-  PAST: 'past'
+  PAST: 'past',
+  ERROR: 'error'
 };
 
 const formViewTypeButton = {
@@ -22,7 +23,8 @@ const formViewTypeButton = {
 const NoPointsTextType = {
   [FilterType.EVERYTHING]: 'Click New Event to create your first point',
   [FilterType.FUTURE]: 'There are no future events now',
-  [FilterType.PAST]: 'There are no past events now'
+  [FilterType.PAST]: 'There are no past events now',
+  [FilterType.ERROR]: 'Oops..the server has problems. Pls try again later',
 };
 
 const UpdateType = {
@@ -30,6 +32,7 @@ const UpdateType = {
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
   INIT: 'INIT',
+  ERROR: 'ERROR',
 };
 
 const UserAction = {

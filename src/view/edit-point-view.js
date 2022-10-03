@@ -23,11 +23,7 @@ const createEditPointTemplate = (point, allOffers, allDestinations, formType) =>
   let deleteOrCancel = '';
 
   if(formType === 'Delete') {
-    if(isDeleting) {
-      deleteOrCancel = 'Deleting...';
-    } else {
-      deleteOrCancel = 'Delete';
-    }
+    deleteOrCancel = isDeleting ? 'Deleting...' : 'Delete';
   } else if (formType === 'Cancel') {
     deleteOrCancel = 'Cancel';
   }

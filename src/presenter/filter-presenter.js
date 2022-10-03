@@ -7,6 +7,7 @@ export default class FilterPresenter {
   #pointModel = null;
   #filterContainer = null;
   #filterComponent = null;
+  filtersToDisable = [];
 
   constructor (filterContainer, pointModel, filterModel) {
     this.#filterContainer = filterContainer;
@@ -27,6 +28,12 @@ export default class FilterPresenter {
     this.#filterComponent = new FiltersView(this.#filterModel.currentFilter);
     this.#filterComponent.setFilterChangeHandler(this.#handleFilterTypeChange);
 
+    if (this.filtersToDisable && this.filtersToDisable.length) {
+      for(const filter of this.filtersToDisable) {
+        this.setDisabling(filter);
+      }
+    }
+
     if (!prevFilterComponent) {
       render(this.#filterComponent, this.#filterContainer);
       return;
@@ -37,9 +44,10 @@ export default class FilterPresenter {
   };
 
   setDisabling = (filter) => {
-    const makeDisableElement = this.#filterComponent.element.querySelector(`.trip-filters__filter-input[value="${filter}"]`);
-
-    makeDisableElement.disabled = true;
+    if (this.#filterComponent) {
+      const makeDisableElement = this.#filterComponent.element.querySelector(`.trip-filters__filter-input[value="${filter}"]`);
+      makeDisableElement.disabled = true;
+    }
   };
 
   #handleModelEvent = () => {
