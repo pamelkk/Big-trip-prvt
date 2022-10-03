@@ -60,12 +60,12 @@ export default class AppPresenter {
     if(!filteredFuturePoints.length) {
       this.#filterPresenter.filtersToDisable.push(FilterType.FUTURE);
     } else {
-      findDisablingFiltersToRemove(this.#filterPresenter.filtersToDisable, FilterType.FUTURE);
+      this.#filterPresenter.filtersToDisable = findDisablingFiltersToRemove(this.#filterPresenter.filtersToDisable, FilterType.FUTURE);
     }
     if(!filteredPastPoints.length) {
       this.#filterPresenter.filtersToDisable.push(FilterType.PAST);
     } else {
-      findDisablingFiltersToRemove(this.#filterPresenter.filtersToDisable, FilterType.PAST);
+      this.#filterPresenter.filtersToDisable = findDisablingFiltersToRemove(this.#filterPresenter.filtersToDisable, FilterType.PAST);
     }
 
     switch (this.#currentSortType) {

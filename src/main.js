@@ -14,7 +14,7 @@ const tripEventsElement = mainElement.querySelector('.trip-events');
 const tripMainInfoElement = headerElement.querySelector('.trip-main');
 
 const AUTHORIZATION = 'Basic jshrg4837wdaikd3';
-const END_POINT = 'https://18.ecmascript.pages.academy/big-trip';
+const END_POINT = 'https://18.ecmascript.pages.academy/big-trips';
 
 const addNewButtonElement = new NewEventButtonView();
 const pointModel = new PointModel(new PointsApiService(END_POINT, AUTHORIZATION), new DestinationsApiService(END_POINT, AUTHORIZATION), new OffersApiService(END_POINT, AUTHORIZATION));
@@ -22,7 +22,7 @@ const filterModel = new FilterModel();
 const appPresenter = new AppPresenter(tripEventsElement, pointModel, filterModel, tripMainInfoElement, tripFiltersElement, addNewButtonElement);
 
 const initPointsModel = async () => {
-  if(await pointModel.init() instanceof Error) {
+  if(await !pointModel.init() instanceof Error) {
     return;
   }
   render(addNewButtonElement, tripMainInfoElement);
