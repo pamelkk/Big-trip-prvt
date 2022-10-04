@@ -192,9 +192,9 @@ export default class AppPresenter {
     render(this.#loadingComponent, this.#appContainer, RenderPosition.AFTERBEGIN);
   };
 
-  #renderNoPoints = () => {
+  #renderNoPoints = (customFilterType) => {
     remove(this.#loadingComponent);
-    this.#noPointsComponent = new NoPointsView(this.currentFilter);
+    this.#noPointsComponent = new NoPointsView(customFilterType ?? this.currentFilter);
     render(this.#noPointsComponent, this.#eventListComponent.element);
   };
 
