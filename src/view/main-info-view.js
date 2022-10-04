@@ -13,17 +13,8 @@ const createMainInfoTemplate = (points, destinations) => {
   let dates = '';
   let way = '';
 
-  //const getMatchedOffers = (all, values) => all.filter((item) => values.find((value) => value.type === item.type));
-  //const matchedOffers = getMatchedOffers(offers, points);
-  //const getAllOffers = (all, values) => all.filter((item) => values.filter((value) => item.offers.filter((itemOffer) => itemOffer.id === value.id)));
-  //console.log(getAllOffers(matchedOffers, points))
-
   if(firstDateElement) {
-    if (firstDateElement === lastDateElement) {
-      dates = `${firstDate}`;
-    } else {
-      dates = `${firstDate}&nbsp;&mdash;&nbsp;${lastDate}`;
-    }
+    dates = `${firstDate}${firstDateElement === lastDateElement ? '' : `&nbsp;&mdash;&nbsp;${lastDate}`}`;
   } else {
     dates = 'No dates :(';
   }

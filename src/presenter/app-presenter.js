@@ -52,15 +52,20 @@ export default class AppPresenter {
   get points() {
     const points = this.#pointModel.points;
     const filteredPoints = filter[this.currentFilter](points);
+    const findDisablingFiltersToRemove = (all, value) => all.filter((item) => item !== value);
 
     const filteredFuturePoints = filter[FilterType.FUTURE](points);
     const filteredPastPoints = filter[FilterType.PAST](points);
 
     if(!filteredFuturePoints.length) {
-      this.#filterPresenter.setDisabling(FilterType.FUTURE);
+      this.#filterPresenter.filtersToDisable.push(FilterType.FUTURE);
+    } else {
+      this.#filterPresenter.filtersToDisable = findDisablingFiltersToRemove(this.#filterPresenter.filtersToDisable, FilterType.FUTURE);
     }
     if(!filteredPastPoints.length) {
-      this.#filterPresenter.setDisabling(FilterType.PAST);
+      this.#filterPresenter.filtersToDisable.push(FilterType.PAST);
+    } else {
+      this.#filterPresenter.filtersToDisable = findDisablingFiltersToRemove(this.#filterPresenter.filtersToDisable, FilterType.PAST);
     }
 
     switch (this.#currentSortType) {
@@ -152,6 +157,12 @@ export default class AppPresenter {
         this.#renderMainInfo();
         this.#renderListClass();
         break;
+      case UpdateType.ERROR:
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
+        this.#clearPointsList();
+        this.#renderNoPoints(FilterType.ERROR);
+        break;
     }
   };
 
@@ -181,8 +192,9 @@ export default class AppPresenter {
     render(this.#loadingComponent, this.#appContainer, RenderPosition.AFTERBEGIN);
   };
 
-  #renderNoPoints = () => {
-    this.#noPointsComponent = new NoPointsView(this.currentFilter);
+  #renderNoPoints = (customFilterType) => {
+    remove(this.#loadingComponent);
+    this.#noPointsComponent = new NoPointsView(customFilterType ?? this.currentFilter);
     render(this.#noPointsComponent, this.#eventListComponent.element);
   };
 
@@ -208,7 +220,7 @@ export default class AppPresenter {
       this.addNewButtonElement.element.disabled = true;
     }
 
-    if(this.points.length === 0) {
+    if(!this.points.length) {
       this.#renderNoPoints();
       return;
     }
@@ -226,7 +238,7 @@ export default class AppPresenter {
   };
 
   #renderMainInfo = () => {
-    this.#mainInfoComponent = new MainInfoView(this.#pointModel.points, this.destinations, this.offers);
+    this.#mainInfoComponent = new MainInfoView(this.#pointModel.points, this.destinations);
     render(this.#mainInfoComponent, this.#mainInfoContainer, RenderPosition.AFTERBEGIN);
   };
 

@@ -2,6 +2,9 @@ import dayjs from 'dayjs';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import { getDestinationById, getMatchedOffersByType, getSelectedOffers, humanizePointDate, humanizePointTime } from '../utils';
 
+const MINUTES_IN_HOURS = 60;
+const MINUTES_IN_DAY = 1440;
+
 const createEventTemplate = (point, allOffers, allDestinations) => {
   const { type, dateFrom, dateTo, basePrice, isFavorite } = point;
 
@@ -27,19 +30,19 @@ const createEventTemplate = (point, allOffers, allDestinations) => {
   let timeDuration = '';
 
   if(timeduration) {
-    if(timeduration <= 59) {
+    if(timeduration < MINUTES_IN_HOURS) {
       timeDuration = `${Math.trunc(timeduration)}M`;
     }
-    if(timeduration >= 60 && timeduration < 1439) {
-      const hours = Math.trunc(timeduration / 60);
-      const minutes = Math.trunc(timeduration % 60);
+    if(timeduration >= MINUTES_IN_HOURS && timeduration < MINUTES_IN_DAY) {
+      const hours = Math.trunc(timeduration / MINUTES_IN_HOURS);
+      const minutes = Math.trunc(timeduration % MINUTES_IN_HOURS);
 
       timeDuration = `${hours}H ${minutes}M`;
     }
-    if(timeduration >= 1440) {
-      const days = Math.trunc(timeduration / 1440);
-      const hours = Math.trunc(days % 1440);
-      const minutes = Math.trunc(hours % 60);
+    if(timeduration >= MINUTES_IN_DAY) {
+      const days = Math.trunc(timeduration / MINUTES_IN_DAY);
+      const hours = Math.trunc(days % MINUTES_IN_DAY);
+      const minutes = Math.trunc(hours % MINUTES_IN_HOURS);
 
       timeDuration = `${days}D ${hours}H ${minutes}M`;
     }
