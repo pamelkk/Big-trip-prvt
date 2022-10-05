@@ -15,6 +15,11 @@ const FilterType = {
   ERROR: 'error'
 };
 
+const MinutesCount = {
+  MINUTES_IN_HOURS: 60,
+  MINUTES_IN_DAY: 1440,
+};
+
 const formViewTypeButton = {
   ADD_FORM: 'Cancel',
   EDIT_FORM: 'Delete',
@@ -41,5 +46,5 @@ const UserAction = {
   ADD_POINT: 'ADD_POINT',
 };
 
-export {TYPE_OF_TRANSPORT, formViewTypeButton, SortType, UpdateType, UserAction, FilterType, NoPointsTextType};
+export {TYPE_OF_TRANSPORT, formViewTypeButton, SortType, MinutesCount, UpdateType, UserAction, FilterType, NoPointsTextType};
 

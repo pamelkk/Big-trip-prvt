@@ -303,8 +303,8 @@ export default class EditPointView extends AbstractStatefulView {
   };
 
   #typeOfDestinationChangeHandler = (evt) => {
-    const TYPE_OF_CITY = this.#destinations.map((city)=> `${city.name}`,'');
-    const check = TYPE_OF_CITY.includes(evt.target.value);
+    const cities = this.#destinations.map((city)=> `${city.name}`,'');
+    const check = cities.includes(evt.target.value);
     if(!check) {
       const errorButtonElement = this.element.querySelector('.event--error');
       errorButtonElement.textContent = 'Pls select a city from the list';
