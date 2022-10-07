@@ -13,7 +13,7 @@ const tripFiltersElement = headerElement.querySelector('.trip-controls__filters'
 const tripEventsElement = mainElement.querySelector('.trip-events');
 const tripMainInfoElement = headerElement.querySelector('.trip-main');
 
-const AUTHORIZATION = 'Basic jshrg4837wdaikd3';
+const AUTHORIZATION = 'Basic jshrg4837wdaikd3a';
 const END_POINT = 'https://18.ecmascript.pages.academy/big-trip';
 
 const addNewButtonElement = new NewEventButtonView();

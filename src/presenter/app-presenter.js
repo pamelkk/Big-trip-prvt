@@ -148,8 +148,6 @@ export default class AppPresenter {
       case UpdateType.MAJOR:
         this.#clearPointsList({resetSortType: true});
         this.#renderListClass();
-        remove(this.#mainInfoComponent);
-        this.#renderMainInfo();
         break;
       case UpdateType.INIT:
         this.#isLoading = false;
