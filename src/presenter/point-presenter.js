@@ -105,18 +105,18 @@ export default class PointPresenter {
 
   #replacePointToEditPoint = () => {
     replace(this.#editPointComponent, this.#pointComponent);
-    document.addEventListener('keydown', this.#onEscKeyDownReplaceEditToPoint);
+    document.addEventListener('keydown', this.#onEscKeyDownReplaceEditToPointHandler);
     this.#changeMode();
     this.#mode = Mode.EDITING;
   };
 
   #replaceEditPointToPoint = () => {
     replace(this.#pointComponent, this.#editPointComponent);
-    document.removeEventListener('keydown', this.#onEscKeyDownReplaceEditToPoint);
+    document.removeEventListener('keydown', this.#onEscKeyDownReplaceEditToPointHandler);
     this.#mode = Mode.DEFAULT;
   };
 
-  #onEscKeyDownReplaceEditToPoint = (evt) => {
+  #onEscKeyDownReplaceEditToPointHandler = (evt) => {
     if (isEscPressed(evt)) {
       evt.preventDefault();
       this.#editPointComponent.reset(this.#info);
@@ -131,6 +131,9 @@ export default class PointPresenter {
   #handleFormSubmit = (update) => {
     const isMinorUpdate = this.#info.type !== update.type || this.#info.offers !== update.offers || this.#info.destination !== update.destination;
     this.#changeData(UserAction.UPDATE_POINT, isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH, update);
+    if(!isMinorUpdate) {
+      this.#replaceEditPointToPoint();
+    }
   };
 
   #handleFormReset = (info) => {

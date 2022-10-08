@@ -35,7 +35,7 @@ export default class NewPointPresenter {
     render(this.#addPointComponent, this.#eventListContainer, RenderPosition.AFTERBEGIN);
 
     this.#addNewButtonElement.element.disabled = true;
-    document.addEventListener('keydown', this.#onEscKeyDownResetNewPointForm);
+    document.addEventListener('keydown', this.#onEscKeyDownResetNewPointFormHandler);
   };
 
   destroy = () => {
@@ -48,7 +48,7 @@ export default class NewPointPresenter {
     remove(this.#addPointComponent);
     this.#addPointComponent = null;
 
-    document.removeEventListener('keydown', this.#onEscKeyDownResetNewPointForm);
+    document.removeEventListener('keydown', this.#onEscKeyDownResetNewPointFormHandler);
   };
 
   setSaving = () => {
@@ -69,7 +69,7 @@ export default class NewPointPresenter {
     this.#addNewButtonElement.element.disabled = false;
   };
 
-  #onEscKeyDownResetNewPointForm = (evt) => {
+  #onEscKeyDownResetNewPointFormHandler = (evt) => {
     if (isEscPressed(evt)) {
       evt.preventDefault();
       this.destroy();
